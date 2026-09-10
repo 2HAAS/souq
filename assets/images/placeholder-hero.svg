@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1350" preserveAspectRatio="xMidYMid slice">
+	<defs>
+		<linearGradient id="souq-hero-bg" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#2b2522"/>
+			<stop offset="1" stop-color="#3d332d"/>
+		</linearGradient>
+	</defs>
+	<rect width="2400" height="1350" fill="url(#souq-hero-bg)"/>
+	<g fill="none" stroke="#f8f4ee" stroke-opacity="0.10" stroke-width="2">
+		<path d="M-100 1000 C 400 850, 800 1150, 1200 950 S 2000 800, 2500 1000"/>
+		<path d="M-100 1100 C 400 950, 800 1250, 1200 1050 S 2000 900, 2500 1100"/>
+		<path d="M-100 1200 C 400 1050, 800 1350, 1200 1150 S 2000 1000, 2500 1200"/>
+	</g>
+	<g fill="none" stroke="#f8f4ee" stroke-opacity="0.14" stroke-width="2">
+		<path d="M1050 300 C 1000 380, 970 460, 1000 580 L 930 850 C 910 1020, 930 1180, 1000 1350 L 1400 1350 C 1470 1180, 1490 1020, 1470 850 L 1400 580 C 1430 460, 1400 380, 1350 300 C 1270 250, 1130 250, 1050 300 Z"/>
+	</g>
+	<circle cx="1200" cy="230" r="60" fill="none" stroke="#f8f4ee" stroke-opacity="0.14" stroke-width="2"/>
+</svg>

@@ -1,0 +1,203 @@
+/* Reset + base typography. Loads after style.css's token block. */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+}
+
+body {
+	margin: 0;
+	background: var(--souq-color-ground);
+	color: var(--souq-color-ink);
+	font-family: var(--souq-font-body);
+	font-size: 0.9375rem;
+	font-weight: 400;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+svg {
+	max-width: 100%;
+	display: block;
+}
+
+img {
+	height: auto;
+}
+
+/* Display type: the serif never shouts. Hierarchy comes from size and
+   letterspacing, never from weight. */
+h1,
+h2,
+h3 {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	line-height: 1.1;
+	letter-spacing: 0.005em;
+	margin: 0 0 var(--souq-space-sm);
+	color: var(--souq-color-ink);
+}
+
+h1 {
+	font-size: clamp(2.75rem, 6vw, 4.5rem);
+}
+
+h2 {
+	font-size: clamp(1.75rem, 3vw, 2.375rem);
+}
+
+h3 {
+	font-size: 1.5rem;
+}
+
+/* Sub-headings inside prose stay in the UI sans so they read as labels,
+   not as competing display type. */
+h4,
+h5,
+h6 {
+	font-family: var(--souq-font-body);
+	font-weight: 500;
+	font-size: 0.9375rem;
+	line-height: 1.4;
+	margin: 0 0 var(--souq-space-2xs);
+}
+
+p {
+	margin: 0 0 var(--souq-space-sm);
+	max-width: var(--souq-measure);
+}
+
+a {
+	color: inherit;
+	text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+	text-underline-offset: 0.22em;
+	transition: text-decoration-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+a:hover {
+	text-decoration-color: currentColor;
+}
+
+ul,
+ol {
+	padding-left: 1.15em;
+}
+
+button {
+	font-family: inherit;
+	color: inherit;
+}
+
+::selection {
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+}
+
+:focus-visible {
+	outline: 2px solid var(--souq-color-accent);
+	outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Shared type utilities
+   ========================================================================== */
+
+/* The label voice: uppercase, letterspaced, small. Used for nav, buttons,
+   badges, accordion headers, product titles, form labels. */
+.souq-label {
+	font-family: var(--souq-font-body);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	line-height: 1.4;
+}
+
+.souq-eyebrow {
+	display: block;
+	font-size: 0.6875rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-2xs);
+}
+
+/* Section heading: centred display serif, the recurring rhythm marker
+   between homepage sections. */
+.souq-section-heading {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	font-size: clamp(1.625rem, 2.6vw, 2.125rem);
+	text-align: center;
+	margin: 0 0 var(--souq-space-lg);
+}
+
+/* Prose inside accordions and descriptions runs in the display serif at a
+   readable size: editorial, and distinct from the UI sans. */
+.souq-prose {
+	font-family: var(--souq-font-display);
+	font-size: 1.125rem;
+	line-height: 1.65;
+	color: color-mix(in oklab, var(--souq-color-ink) 82%, var(--souq-color-ground));
+}
+
+.souq-prose p:last-child {
+	margin-bottom: 0;
+}
+
+.screen-reader-text {
+	border: 0;
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+.screen-reader-text:focus {
+	background: var(--souq-color-ground);
+	border-radius: var(--souq-radius-sm);
+	box-shadow: var(--souq-shadow-overlay);
+	clip-path: none;
+	display: block;
+	height: auto;
+	left: var(--souq-space-sm);
+	padding: var(--souq-space-2xs) var(--souq-space-sm);
+	top: var(--souq-space-sm);
+	width: auto;
+	z-index: 100000;
+}
+
+.skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100000;
+	background: var(--souq-color-ink);
+	color: var(--souq-color-ground);
+	padding: var(--souq-space-2xs) var(--souq-space-sm);
+}
+
+.skip-link:focus {
+	left: var(--souq-space-sm);
+	top: var(--souq-space-sm);
+}

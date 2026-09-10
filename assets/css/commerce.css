@@ -1,0 +1,617 @@
+/* ==========================================================================
+   Cart, checkout, order confirmation and account.
+
+   WooCommerce ships two entirely different front ends for cart and checkout:
+   the classic shortcode templates (PHP, `.woocommerce-cart-form`,
+   `#customer_details`) and the newer Cart/Checkout blocks (React,
+   `.wc-block-*`). Which one a site uses depends on when it was built, so both
+   are styled here rather than assuming either.
+
+   The layout is done with CSS on WooCommerce's own markup wherever possible
+   instead of overriding templates: checkout templates change between releases
+   and payment gateways hook into them, so the fewer we replace the less there
+   is to break on update.
+   ========================================================================== */
+
+.woocommerce-cart .souq-container,
+.woocommerce-checkout .souq-container,
+.woocommerce-account .souq-container {
+	padding-bottom: var(--souq-space-2xl);
+}
+
+/* Page titles on the commerce flow sit quieter than a category title: the
+   task matters more than the branding here. */
+.woocommerce-cart .entry-title,
+.woocommerce-checkout .entry-title,
+.woocommerce-account .entry-title {
+	font-size: clamp(2rem, 4vw, 3rem);
+	margin-bottom: var(--souq-space-lg);
+}
+
+/* --------------------------------------------------------------------------
+   Classic cart
+
+   The two-column layout below is only safe to impose when `.woocommerce` is
+   genuinely the vanilla cart.php wrapper — form and cart-collaterals as its
+   *direct* children. Page builders that ship their own dedicated Cart widget
+   (Elementor Pro's `.e-cart__container` is one) nest that same markup two or
+   three levels deeper inside their own responsive column system. Matching on
+   `:has(.woocommerce-cart-form)` alone still finds the form as a descendant
+   and fires this grid on `.woocommerce` itself, but `grid-column` on the form
+   is then a no-op (it isn't a grid item of this grid), while the notices
+   wrapper — which *is* a direct child — still claims half the row. That left
+   the builder's own column split fighting for the remaining half-width,
+   which is what collapsed the totals column on top of the line-item table.
+   Requiring the direct-child combinator scopes this to vanilla markup only;
+   builder-rendered carts are left to their own layout and only get the
+   cosmetic rules below.
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 900px) {
+	.woocommerce-cart .woocommerce:has( > form.woocommerce-cart-form ) > .woocommerce-notices-wrapper,
+	.woocommerce-cart .woocommerce:has( > form.woocommerce-cart-form ) > form.woocommerce-cart-form {
+		grid-column: 1;
+	}
+
+	/* Line items left, totals right and sticky, rather than totals dumped
+	   below a full-width table. */
+	.woocommerce-cart .woocommerce:has( > form.woocommerce-cart-form ) {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.9fr);
+		gap: var(--souq-space-xl);
+		align-items: start;
+	}
+
+	.woocommerce-cart .woocommerce:has( > form.woocommerce-cart-form ) > .cart-collaterals {
+		grid-column: 2;
+		position: sticky;
+		top: calc(var(--souq-header-actual, var(--souq-header-height)) + var(--souq-space-sm));
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Page-builder Cart widgets (e.g. Elementor Pro's dedicated Cart widget)
+
+   These still call WooCommerce's own cart-totals template internally, so the
+   table/typography rules further down still match and apply. Only layout is
+   left alone here, since the builder already handles its own responsive
+   columns and fighting it is what caused the original overlap.
+   -------------------------------------------------------------------------- */
+
+[class*='e-cart__'] .cart_totals,
+[class*='e-cart-totals'] .cart_totals {
+	background: var(--souq-color-surface);
+	border-radius: var(--souq-radius-md);
+	padding: var(--souq-space-md);
+}
+
+.woocommerce-cart table.shop_table {
+	border: none;
+}
+
+.woocommerce-cart table.shop_table thead th {
+	border-bottom: 1px solid var(--souq-color-hairline);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+	padding-bottom: var(--souq-space-2xs);
+}
+
+.woocommerce-cart table.shop_table td {
+	padding-block: var(--souq-space-md);
+	border-bottom: 1px solid var(--souq-color-hairline);
+	vertical-align: middle;
+}
+
+.woocommerce-cart td.product-thumbnail img {
+	width: 4.5rem;
+	aspect-ratio: var(--souq-card-aspect);
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+}
+
+.woocommerce-cart td.product-name a {
+	text-decoration: none;
+	font-size: 0.8125rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-ink);
+}
+
+.woocommerce-cart .product-remove a.remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--souq-color-muted) !important;
+	font-size: 1.1rem;
+	line-height: 1;
+	text-decoration: none;
+}
+
+.woocommerce-cart .product-remove a.remove:hover {
+	background: var(--souq-color-surface);
+	color: var(--souq-color-error) !important;
+}
+
+.cart-collaterals .cart_totals > h2 {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	font-size: 1.375rem;
+	margin-bottom: var(--souq-space-sm);
+}
+
+.cart-collaterals .cart_totals {
+	background: var(--souq-color-surface);
+	border-radius: var(--souq-radius-md);
+	padding: var(--souq-space-md);
+}
+
+.cart-collaterals table.shop_table th,
+.cart-collaterals table.shop_table td {
+	border: none;
+	border-bottom: 1px solid color-mix(in oklab, var(--souq-color-hairline) 60%, transparent);
+	padding-block: var(--souq-space-2xs);
+}
+
+.cart-collaterals .order-total th,
+.cart-collaterals .order-total td {
+	border-bottom: none;
+	padding-top: var(--souq-space-sm);
+	font-size: 1rem;
+}
+
+.wc-proceed-to-checkout {
+	margin-top: var(--souq-space-sm);
+}
+
+.wc-proceed-to-checkout .checkout-button {
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+/* Coupon row */
+.woocommerce-cart .coupon {
+	display: flex;
+	gap: var(--souq-space-2xs);
+	align-items: stretch;
+}
+
+.woocommerce-cart .coupon .input-text {
+	min-width: 0;
+	flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Classic checkout
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 1000px) {
+	/* #customer_details, #order_review_heading and #order_review are siblings
+	   with no wrapper, so they are placed explicitly rather than wrapped. */
+	.woocommerce-checkout form.checkout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(20rem, 0.75fr);
+		column-gap: var(--souq-space-xl);
+		align-items: start;
+	}
+
+	.woocommerce-checkout form.checkout #customer_details {
+		grid-column: 1;
+		grid-row: 1 / span 2;
+	}
+
+	.woocommerce-checkout form.checkout #order_review_heading {
+		grid-column: 2;
+		grid-row: 1;
+		margin-top: 0;
+	}
+
+	.woocommerce-checkout form.checkout #order_review {
+		grid-column: 2;
+		grid-row: 2;
+		position: sticky;
+		top: calc(var(--souq-header-actual, var(--souq-header-height)) + var(--souq-space-sm));
+	}
+}
+
+.woocommerce-checkout #customer_details .col-1,
+.woocommerce-checkout #customer_details .col-2 {
+	float: none;
+	width: 100%;
+}
+
+.woocommerce-checkout h3,
+.woocommerce-checkout #order_review_heading {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	font-size: 1.375rem;
+	margin-bottom: var(--souq-space-sm);
+}
+
+.woocommerce-checkout #order_review {
+	background: var(--souq-color-surface);
+	border-radius: var(--souq-radius-md);
+	padding: var(--souq-space-md);
+}
+
+.woocommerce-checkout #order_review table.shop_table {
+	margin-bottom: var(--souq-space-sm);
+}
+
+.woocommerce-checkout #order_review table.shop_table th,
+.woocommerce-checkout #order_review table.shop_table td {
+	border: none;
+	border-bottom: 1px solid color-mix(in oklab, var(--souq-color-hairline) 60%, transparent);
+	padding-block: var(--souq-space-2xs);
+}
+
+.woocommerce-checkout #order_review .order-total th,
+.woocommerce-checkout #order_review .order-total td {
+	border-bottom: none;
+	font-size: 1rem;
+	padding-top: var(--souq-space-sm);
+}
+
+#payment {
+	background: transparent;
+	border-radius: 0;
+}
+
+#payment ul.payment_methods {
+	margin: 0 0 var(--souq-space-sm);
+	padding: 0;
+	list-style: none;
+	border: none;
+}
+
+#payment ul.payment_methods li {
+	padding-block: var(--souq-space-2xs);
+	border-bottom: 1px solid color-mix(in oklab, var(--souq-color-hairline) 60%, transparent);
+}
+
+#payment ul.payment_methods li:last-child {
+	border-bottom: none;
+}
+
+#payment div.payment_box {
+	background: var(--souq-color-ground);
+	border-radius: var(--souq-radius-sm);
+	padding: var(--souq-space-sm);
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+}
+
+/* WooCommerce draws a CSS triangle on the payment box; it points at the
+   wrong colour once the box is re-skinned. */
+#payment div.payment_box::before {
+	border-bottom-color: var(--souq-color-ground) !important;
+}
+
+#payment #place_order {
+	width: 100%;
+	margin-top: var(--souq-space-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Block cart and checkout
+   -------------------------------------------------------------------------- */
+
+/* The blocks expose their own custom properties; point them at Souq's tokens
+   so the React UI inherits the theme rather than shipping its own palette. */
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	--wc-blocks-color-accent: var(--souq-color-accent);
+	--wc-blocks-color-error: var(--souq-color-error);
+	--wp--preset--color--contrast: var(--souq-color-ink);
+}
+
+.wc-block-components-title,
+.wp-block-woocommerce-checkout-order-summary-block .wc-block-components-title {
+	font-family: var(--souq-font-display) !important;
+	font-weight: 300 !important;
+}
+
+.wc-block-components-checkout-step__heading,
+.wc-block-cart__submit-container + *,
+.wc-block-components-order-summary__title {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+}
+
+.wc-block-components-text-input input,
+.wc-block-components-select .wc-blocks-components-select__select,
+.wc-block-components-textarea {
+	border-radius: var(--souq-radius-md) !important;
+	border-color: var(--souq-color-hairline) !important;
+	background: var(--souq-color-ground) !important;
+	color: var(--souq-color-ink) !important;
+	font-family: var(--souq-font-body) !important;
+}
+
+.wc-block-components-text-input input:focus,
+.wc-block-components-select .wc-blocks-components-select__select:focus {
+	border-color: var(--souq-color-accent) !important;
+	box-shadow: none !important;
+	outline: 2px solid var(--souq-color-accent);
+	outline-offset: 1px;
+}
+
+.wc-block-components-button:not(.is-link) {
+	border-radius: var(--souq-radius-md) !important;
+	background-color: var(--souq-color-accent) !important;
+	color: var(--souq-color-ground) !important;
+	font-family: var(--souq-font-body) !important;
+	font-size: 0.6875rem !important;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	min-height: 3rem;
+}
+
+.wc-block-components-button:not(.is-link):hover {
+	background-color: var(--souq-color-accent-deep) !important;
+}
+
+.wc-block-components-sidebar .wc-block-components-panel,
+.wp-block-woocommerce-checkout-order-summary-block {
+	background: var(--souq-color-surface);
+	border-radius: var(--souq-radius-md);
+	border: none;
+}
+
+.wc-block-components-product-name {
+	font-size: 0.8125rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+.wc-block-cart-item__image img,
+.wc-block-components-order-summary-item__image img {
+	border-radius: var(--souq-radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Order received / confirmation
+   -------------------------------------------------------------------------- */
+
+.souq-order {
+	max-width: 52rem;
+}
+
+.souq-order__title {
+	font-size: clamp(2.25rem, 5vw, 3.5rem);
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-order__lede {
+	font-family: var(--souq-font-display);
+	font-size: 1.125rem;
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-lg);
+}
+
+.souq-order__lede strong {
+	color: var(--souq-color-ink);
+	font-weight: 400;
+}
+
+/* Order facts read as a scannable grid rather than WooCommerce's bullet
+   list, which looked like a printed receipt. */
+.souq-order__facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+	gap: var(--souq-space-md);
+	margin: 0 0 var(--souq-space-xl);
+	padding: var(--souq-space-md) 0;
+	list-style: none;
+	border-block: 1px solid var(--souq-color-hairline);
+}
+
+.souq-order__facts li {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.souq-order__fact-label {
+	display: block;
+	margin-bottom: 0.15rem;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+}
+
+.souq-order__facts strong {
+	font-weight: 400;
+	font-size: 0.9375rem;
+}
+
+.souq-order__section-title,
+.souq-order .woocommerce-column__title,
+.souq-order h2 {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	font-size: 1.5rem;
+	margin-bottom: var(--souq-space-sm);
+}
+
+.souq-order__steps {
+	display: grid;
+	gap: var(--souq-space-md);
+	margin: 0 0 var(--souq-space-xl);
+	padding: 0;
+	list-style: none;
+	counter-reset: none;
+}
+
+@media (min-width: 782px) {
+	.souq-order__steps {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.souq-order__step {
+	display: flex;
+	gap: var(--souq-space-sm);
+	align-items: flex-start;
+}
+
+.souq-order__step-number {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 999px;
+	background: var(--souq-color-accent-soft);
+	color: var(--souq-color-accent-deep);
+	font-size: 0.75rem;
+}
+
+.souq-order__step-title {
+	font-family: var(--souq-font-body);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	margin: 0.25rem 0 0.25rem;
+}
+
+.souq-order__step-body {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-order__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--souq-space-2xs);
+	margin-top: var(--souq-space-lg);
+}
+
+.souq-order__failed-note {
+	max-width: var(--souq-measure);
+	color: var(--souq-color-muted);
+}
+
+/* The order and customer detail tables WooCommerce appends below. */
+.souq-order table.shop_table {
+	width: 100%;
+	border: none;
+	margin-bottom: var(--souq-space-lg);
+}
+
+.souq-order table.shop_table th,
+.souq-order table.shop_table td {
+	border: none;
+	border-bottom: 1px solid var(--souq-color-hairline);
+	padding-block: var(--souq-space-2xs);
+}
+
+.souq-order .woocommerce-customer-details address {
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	padding: var(--souq-space-sm);
+	font-style: normal;
+	font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------------------------
+   Empty cart
+   -------------------------------------------------------------------------- */
+
+.souq-empty {
+	max-width: 34rem;
+	padding-block: var(--souq-space-xl) var(--souq-space-2xl);
+}
+
+.souq-empty__title {
+	font-size: clamp(2rem, 4vw, 3rem);
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-empty__body {
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-md);
+}
+
+.souq-empty__actions {
+	margin-bottom: var(--souq-space-lg);
+}
+
+.souq-empty__links-label {
+	display: block;
+	margin-bottom: var(--souq-space-2xs);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+}
+
+.souq-empty__links ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--souq-space-sm);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.souq-empty__links a {
+	font-size: 0.8125rem;
+	text-decoration: none;
+	border-bottom: 1px solid var(--souq-color-hairline);
+	padding-bottom: 0.1rem;
+}
+
+.souq-empty__links a:hover {
+	border-bottom-color: var(--souq-color-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Account
+   -------------------------------------------------------------------------- */
+
+.woocommerce-account .woocommerce-MyAccount-navigation ul {
+	list-style: none;
+	margin: 0 0 var(--souq-space-lg);
+	padding: 0;
+	border-bottom: 1px solid var(--souq-color-hairline);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--souq-space-md);
+}
+
+.woocommerce-account .woocommerce-MyAccount-navigation a {
+	display: inline-block;
+	padding-bottom: var(--souq-space-2xs);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	text-decoration: none;
+	color: var(--souq-color-muted);
+	border-bottom: 1px solid transparent;
+	margin-bottom: -1px;
+}
+
+.woocommerce-account .woocommerce-MyAccount-navigation .is-active a {
+	color: var(--souq-color-ink);
+	border-bottom-color: var(--souq-color-ink);
+}
+
+@media (min-width: 900px) {
+	.woocommerce-account .woocommerce-MyAccount-navigation,
+	.woocommerce-account .woocommerce-MyAccount-content {
+		float: none;
+		width: 100%;
+	}
+}

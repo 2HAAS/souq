@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice">
+	<defs>
+		<linearGradient id="souq-ph-bg" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#f8f4ee"/>
+			<stop offset="1" stop-color="#efe8de"/>
+		</linearGradient>
+	</defs>
+	<rect width="800" height="1000" fill="url(#souq-ph-bg)"/>
+	<g fill="none" stroke="#8b4a38" stroke-opacity="0.28" stroke-width="1.5">
+		<path d="M-50 720 C 150 660, 300 800, 500 700 S 850 640, 950 720"/>
+		<path d="M-50 780 C 150 720, 300 860, 500 760 S 850 700, 950 780"/>
+		<path d="M-50 840 C 150 780, 300 920, 500 820 S 850 760, 950 840"/>
+	</g>
+	<g fill="none" stroke="#2b2522" stroke-opacity="0.16" stroke-width="1.5">
+		<path d="M320 220 C 300 260, 285 300, 300 360 L 260 520 C 250 620, 260 720, 300 880 L 500 880 C 540 720, 550 620, 540 520 L 500 360 C 515 300, 500 260, 480 220 C 440 195, 360 195, 320 220 Z"/>
+		<path d="M320 220 C 280 260, 220 300, 190 380" stroke-dasharray="2 10" stroke-linecap="round"/>
+		<path d="M480 220 C 520 260, 580 300, 610 380" stroke-dasharray="2 10" stroke-linecap="round"/>
+		<line x1="400" y1="240" x2="400" y2="860" stroke-opacity="0.08"/>
+	</g>
+	<circle cx="400" cy="180" r="34" fill="none" stroke="#2b2522" stroke-opacity="0.16" stroke-width="1.5"/>
+</svg>

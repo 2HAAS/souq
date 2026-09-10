@@ -1,0 +1,114 @@
+/* AJAX search results list inside the slide-down search panel. */
+
+.souq-search-results {
+	max-height: 60vh;
+	overflow-y: auto;
+}
+
+.souq-search-results:not(:empty) {
+	margin-top: var(--souq-space-md);
+}
+
+.souq-search-results__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: var(--souq-space-2xs);
+}
+
+.souq-search-result {
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-sm);
+	padding: var(--souq-space-2xs);
+	text-decoration: none;
+	color: var(--souq-color-ink);
+	border-radius: var(--souq-radius-sm);
+	transition: background-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-search-result:hover,
+.souq-search-result:focus-visible {
+	background: var(--souq-color-surface);
+}
+
+.souq-search-result__thumb {
+	width: 3rem;
+	height: 3.75rem;
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+	flex-shrink: 0;
+	background: var(--souq-color-surface);
+}
+
+.souq-search-result__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.souq-search-result__name {
+	font-size: 0.9375rem;
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.souq-search-result__meta {
+	display: flex;
+	gap: var(--souq-space-2xs);
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-search-result__price {
+	font-size: 0.9375rem;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.souq-search-results__footer {
+	margin-top: var(--souq-space-sm);
+	text-align: center;
+}
+
+.souq-search-results__empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--souq-space-2xs);
+	padding: var(--souq-space-lg) 0;
+	color: var(--souq-color-muted);
+	text-align: center;
+}
+
+.souq-search-results__loading {
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-2xs);
+	padding: var(--souq-space-sm) 0;
+	color: var(--souq-color-muted);
+	font-size: 0.875rem;
+}
+
+.souq-search-results__spinner {
+	width: 1rem;
+	height: 1rem;
+	border-radius: 50%;
+	border: 2px solid var(--souq-color-sand);
+	border-top-color: var(--souq-color-accent);
+	animation: souq-spin 700ms linear infinite;
+}
+
+@keyframes souq-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.souq-search-results__spinner {
+		animation: none;
+	}
+}

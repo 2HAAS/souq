@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1125" preserveAspectRatio="xMidYMid slice">
+	<defs>
+		<linearGradient id="souq-cat-bg" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#efe8de"/>
+			<stop offset="1" stop-color="#f8f4ee"/>
+		</linearGradient>
+	</defs>
+	<rect width="900" height="1125" fill="url(#souq-cat-bg)"/>
+	<g fill="none" stroke="#2b2522" stroke-opacity="0.14" stroke-width="1.5">
+		<path d="M370 260 C 350 300, 335 340, 350 400 L 310 570 C 300 680, 310 790, 350 960 L 550 960 C 590 790, 600 680, 590 570 L 550 400 C 565 340, 550 300, 530 260 C 480 235, 420 235, 370 260 Z"/>
+	</g>
+	<circle cx="450" cy="215" r="38" fill="none" stroke="#2b2522" stroke-opacity="0.14" stroke-width="1.5"/>
+	<g fill="none" stroke="#8b4a38" stroke-opacity="0.2" stroke-width="1.5">
+		<path d="M-50 830 C 150 780, 300 900, 450 820 S 750 780, 950 830"/>
+	</g>
+</svg>

@@ -1,0 +1,219 @@
+/* ==========================================================================
+   Product card. No border, no fill, no shadow, no radius on the container:
+   the garment photograph sits directly on the page ground.
+   ========================================================================== */
+
+.souq-card {
+	position: relative;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Never show the same product twice in one view (PRODUCT.md principle 2):
+   if this card's product is currently open elsewhere on the page (a
+   recommend-list row expanded), assets/js/product.js hides the card rather
+   than let it sit there duplicated. See .souq-recommend__item.is-hidden-
+   elsewhere in product.css for the sibling rule. */
+.souq-card.is-hidden-elsewhere {
+	display: none;
+}
+
+.souq-card__media {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	background: var(--souq-color-surface);
+	border-radius: var(--souq-radius-sm);
+	aspect-ratio: var(--souq-card-aspect);
+}
+
+.souq-card__link {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* Slides are stacked and cross-faded. Only opacity animates, so a long
+   catalogue page stays smooth. */
+.souq-card__image {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transition: opacity var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-card__image.is-active {
+	opacity: 1;
+}
+
+/* Single-image cards have no .is-active toggling to rely on. */
+.souq-card__media:not(.souq-card__media--slider) .souq-card__image {
+	position: relative;
+	opacity: 1;
+}
+
+.souq-card__image--empty {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background: var(--souq-color-surface);
+}
+
+.souq-card__badge {
+	position: absolute;
+	top: var(--souq-space-2xs);
+	left: var(--souq-space-2xs);
+	z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   Card slider controls: revealed on hover, and on keyboard focus so the
+   slider is not pointer-only.
+   -------------------------------------------------------------------------- */
+
+.souq-card__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	padding: 0;
+	transform: translateY(-50%);
+	border: none;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--souq-color-ground) 90%, transparent);
+	color: var(--souq-color-ink);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--souq-duration-fast) var(--souq-ease),
+		background-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-card__nav svg {
+	width: 0.875rem;
+	height: 0.875rem;
+}
+
+.souq-card__nav--prev {
+	left: var(--souq-space-2xs);
+}
+
+.souq-card__nav--next {
+	right: var(--souq-space-2xs);
+}
+
+.souq-card__nav:hover {
+	background: var(--souq-color-ground);
+}
+
+.souq-card__counter {
+	position: absolute;
+	bottom: var(--souq-space-2xs);
+	right: var(--souq-space-2xs);
+	z-index: 3;
+	padding: 0.15rem 0.45rem;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--souq-color-ink) 62%, transparent);
+	color: var(--souq-color-ground);
+	font-size: 0.625rem;
+	letter-spacing: 0.04em;
+	opacity: 0;
+	transition: opacity var(--souq-duration-fast) var(--souq-ease);
+}
+
+@media (hover: hover) {
+	.souq-card__media--slider:hover .souq-card__nav,
+	.souq-card__media--slider:hover .souq-card__counter {
+		opacity: 1;
+	}
+}
+
+/* Touch devices have no hover, so the controls stay visible there. */
+@media (hover: none) {
+	.souq-card__media--slider .souq-card__nav,
+	.souq-card__media--slider .souq-card__counter {
+		opacity: 1;
+	}
+}
+
+.souq-card:focus-within .souq-card__nav,
+.souq-card:focus-within .souq-card__counter,
+.souq-card__nav:focus-visible {
+	opacity: 1;
+}
+
+.souq-card__body {
+	padding-top: var(--souq-space-2xs);
+}
+
+.souq-card__title {
+	font-family: var(--souq-font-body);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	line-height: 1.5;
+	margin: 0 0 0.2rem;
+}
+
+.souq-card__title a {
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+/* The whole card is clickable via the media link, but only the title carries
+   the accessible name, so the media link is aria-hidden and untabbable. The
+   overlay sits below the slider controls (z-index 3) so the arrows stay
+   clickable rather than being covered by the card-wide hit area. */
+.souq-card__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.souq-card__meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--souq-space-2xs);
+}
+
+.souq-card__swatches {
+	display: inline-flex;
+	gap: 0.25rem;
+	flex-shrink: 0;
+}
+
+.souq-card__swatch {
+	display: block;
+	width: 0.75rem;
+	height: 0.75rem;
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: 2px;
+	background: var(--souq-swatch-color, var(--souq-color-surface));
+}
+
+/* WooCommerce's price markup inside the card */
+
+.souq-card .souq-price {
+	font-size: 0.75rem;
+	color: var(--souq-color-ink);
+}
+
+.souq-card .souq-price del {
+	color: var(--souq-color-muted);
+	font-size: 0.6875rem;
+}
+
+.souq-card .souq-price ins {
+	text-decoration: none;
+	color: var(--souq-color-accent);
+}

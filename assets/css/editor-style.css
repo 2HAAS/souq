@@ -1,0 +1,73 @@
+/* Block editor preview.
+   Mirrors the v0.2 tokens so patterns look true-to-frontend while editing.
+   These literals are a fallback for the editor iframe only; the front end
+   gets the live values from Customizer::output_tokens_css(). */
+
+:root {
+	--souq-color-accent: #8b4a38;
+	--souq-color-accent-deep: #754132;
+	--souq-color-accent-soft: #f2e8e0;
+	--souq-color-ink: #26221e;
+	--souq-color-ground: #fdfaf3;
+	--souq-color-surface: #f6f1e6;
+	--souq-color-muted: #6f6b66;
+	--souq-color-hairline: #dbd7d1;
+	--souq-font-display: "Cormorant Garamond", Georgia, serif;
+	--souq-font-body: "Jost", system-ui, sans-serif;
+	--souq-tracking-label: 0.12em;
+	--souq-radius-md: 4px;
+}
+
+body {
+	font-family: var(--souq-font-body);
+	font-size: 0.9375rem;
+	line-height: 1.6;
+	color: var(--souq-color-ink);
+	background: var(--souq-color-ground);
+}
+
+h1,
+h2,
+h3,
+.wp-block-heading {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	line-height: 1.1;
+}
+
+.souq-section-heading {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	text-align: center;
+}
+
+.souq-eyebrow,
+.souq-tile__label,
+.souq-band__item,
+.souq-hero__tagline {
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+}
+
+.souq-hero__wordmark {
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	text-transform: uppercase;
+	letter-spacing: 0.24em;
+	line-height: 1;
+}
+
+.wp-block-button__link {
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+	border-radius: var(--souq-radius-md);
+	text-transform: uppercase;
+	font-size: 0.6875rem;
+	letter-spacing: var(--souq-tracking-label);
+	padding: 0.875rem 1.75rem;
+}
+
+.souq-section--surface {
+	background: var(--souq-color-surface);
+}

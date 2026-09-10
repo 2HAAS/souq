@@ -1,0 +1,262 @@
+/* ==========================================================================
+   Homepage sections. Built from core blocks, so these styles attach to the
+   block classnames plus the pattern's own modifier class.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Hero: the brand name set very large over full-bleed photography
+   -------------------------------------------------------------------------- */
+
+/* Only pull the hero under the header when the header is actually overlaying
+   it. With a solid header the pull-up would slide the top of the photograph
+   underneath an opaque bar and clip it.
+
+   --souq-header-actual is measured and published by main.js, because the
+   header's height varies by layout (stacked adds a row) and by typeface. The
+   static token is the pre-JS fallback. */
+.souq-has-transparent-header .souq-hero {
+	margin-top: calc(var(--souq-header-actual, var(--souq-header-height)) * -1);
+}
+
+/* Give the hero content room to clear an overlaid header of any height. */
+.souq-has-transparent-header .souq-hero .wp-block-cover__inner-container {
+	padding-top: var(--souq-header-actual, var(--souq-header-height));
+}
+
+/* The cover block itself is the flex parent, so the vertical anchor has to
+   be set here rather than on the inner container. Content sits low in the
+   frame, leaving the upper two-thirds of the photograph uninterrupted. */
+.souq-hero.wp-block-cover {
+	align-items: flex-end;
+	padding-bottom: clamp(2.5rem, 8vh, 5.5rem);
+}
+
+.souq-hero .wp-block-cover__inner-container {
+	width: 100%;
+	max-width: 60rem;
+	padding-inline: var(--souq-gutter);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--souq-space-xs);
+}
+
+.souq-hero__wordmark {
+	margin: 0;
+	font-family: var(--souq-font-display);
+	font-weight: 300;
+	font-size: clamp(3rem, 11vw, 8rem);
+	line-height: 1;
+	letter-spacing: var(--souq-tracking-wordmark);
+	text-transform: uppercase;
+	/* Optical correction: wide tracking adds trailing space on the right,
+	   which reads as off-centre without this nudge. */
+	text-indent: var(--souq-tracking-wordmark);
+}
+
+.souq-hero__tagline {
+	margin: 0;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	opacity: 0.85;
+}
+
+.souq-hero .wp-block-buttons {
+	margin-top: var(--souq-space-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Category tiles
+   -------------------------------------------------------------------------- */
+
+.souq-tiles {
+	gap: var(--souq-space-md) !important;
+}
+
+.souq-tile__media {
+	margin: 0;
+	overflow: hidden;
+	border-radius: var(--souq-radius-sm);
+}
+
+.souq-tile__media img {
+	width: 100%;
+	aspect-ratio: var(--souq-card-aspect);
+	object-fit: cover;
+	transition: transform 700ms var(--souq-ease);
+}
+
+@media (hover: hover) {
+	.souq-tile:hover .souq-tile__media img {
+		transform: scale(1.03);
+	}
+}
+
+.souq-tile__label {
+	margin: var(--souq-space-2xs) 0 0;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+}
+
+.souq-tile__label a {
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+/* --------------------------------------------------------------------------
+   Product sections (rendered by the Souq Product Grid block)
+   -------------------------------------------------------------------------- */
+
+.souq-product-section__head {
+	position: relative;
+	margin-bottom: var(--souq-space-lg);
+}
+
+.souq-product-section__head .souq-section-heading {
+	margin-bottom: 0;
+}
+
+/* "View all" sits on the heading's baseline at the right edge on desktop,
+   and drops below the centred heading on small screens. */
+.souq-view-all {
+	display: block;
+	margin-top: var(--souq-space-2xs);
+	text-align: center;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+	text-decoration: none;
+	border-bottom: 1px solid var(--souq-color-hairline);
+	padding-bottom: 0.15rem;
+	width: fit-content;
+	margin-inline: auto;
+}
+
+.souq-view-all:hover {
+	color: var(--souq-color-ink);
+	border-bottom-color: currentColor;
+}
+
+@media (min-width: 782px) {
+	.souq-view-all {
+		position: absolute;
+		right: 0;
+		bottom: 0.35rem;
+		margin: 0;
+	}
+}
+
+.souq-grid-empty {
+	padding: var(--souq-space-md);
+	border: 1px dashed var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	color: var(--souq-color-muted);
+	font-size: 0.8125rem;
+	text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Editorial promise band
+   -------------------------------------------------------------------------- */
+
+.souq-band .wp-block-cover__inner-container {
+	width: 100%;
+	max-width: var(--souq-content-width);
+	padding-inline: var(--souq-gutter);
+}
+
+.souq-band__row {
+	gap: 0 !important;
+}
+
+.souq-band__row .wp-block-column + .wp-block-column {
+	border-left: 1px solid color-mix(in oklab, var(--souq-color-ground) 30%, transparent);
+}
+
+.souq-band__item {
+	margin: 0;
+	padding-inline: var(--souq-space-sm);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	line-height: 1.6;
+}
+
+@media (max-width: 781px) {
+	.souq-band__row {
+		gap: var(--souq-space-sm) !important;
+	}
+
+	.souq-band__row .wp-block-column + .wp-block-column {
+		border-left: none;
+		border-top: 1px solid color-mix(in oklab, var(--souq-color-ground) 25%, transparent);
+		padding-top: var(--souq-space-sm);
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Newsletter
+   -------------------------------------------------------------------------- */
+
+.souq-newsletter {
+	max-width: 34rem;
+	margin-inline: auto;
+	text-align: center;
+}
+
+.souq-newsletter__intro {
+	margin-inline: auto;
+	margin-bottom: var(--souq-space-md);
+	font-size: 0.875rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-newsletter__form {
+	display: flex;
+	gap: var(--souq-space-2xs);
+}
+
+.souq-newsletter__form .souq-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.souq-newsletter__status {
+	min-height: 1.25rem;
+	margin: var(--souq-space-2xs) 0 0;
+	font-size: 0.8125rem;
+}
+
+.souq-newsletter__status[data-state="success"] {
+	color: var(--souq-color-success);
+}
+
+.souq-newsletter__status[data-state="error"] {
+	color: var(--souq-color-error);
+}
+
+@media (max-width: 520px) {
+	.souq-newsletter__form {
+		flex-direction: column;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Homepage empty state (editors only)
+   -------------------------------------------------------------------------- */
+
+.souq-homepage-empty {
+	max-width: 34rem;
+	margin-inline: auto;
+	text-align: center;
+	padding-block: var(--souq-space-2xl);
+}
+
+.souq-homepage-empty p {
+	margin-inline: auto;
+	margin-bottom: var(--souq-space-md);
+	color: var(--souq-color-muted);
+}

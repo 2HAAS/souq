@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1000" preserveAspectRatio="xMidYMid slice">
+	<defs>
+		<linearGradient id="souq-banner-bg" x1="0" y1="0" x2="1" y2="0">
+			<stop offset="0" stop-color="#efe8de"/>
+			<stop offset="1" stop-color="#ddd6cd"/>
+		</linearGradient>
+	</defs>
+	<rect width="2400" height="1000" fill="url(#souq-banner-bg)"/>
+	<g fill="none" stroke="#8b4a38" stroke-opacity="0.22" stroke-width="2">
+		<path d="M-100 500 C 500 380, 900 620, 1300 480 S 2000 380, 2500 500"/>
+		<path d="M-100 600 C 500 480, 900 720, 1300 580 S 2000 480, 2500 600"/>
+	</g>
+	<g fill="none" stroke="#2b2522" stroke-opacity="0.12" stroke-width="2">
+		<path d="M-100 700 C 500 600, 900 820, 1300 700 S 2000 600, 2500 700"/>
+	</g>
+</svg>

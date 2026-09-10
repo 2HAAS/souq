@@ -1,0 +1,474 @@
+/* ==========================================================================
+   Component vocabulary. Apparel-retail conventions: rectangular size
+   buttons, square colour chips, uppercase letterspaced labels, hairline
+   accordions. See DESIGN.md section 5.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.souq-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--souq-space-2xs);
+	appearance: none;
+	min-height: 3rem;
+	padding: 0.875rem 1.75rem;
+	border: 1px solid transparent;
+	border-radius: var(--souq-radius-md);
+	font-family: var(--souq-font-body);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		background-color var(--souq-duration-fast) var(--souq-ease),
+		color var(--souq-duration-fast) var(--souq-ease),
+		border-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-btn svg {
+	width: 1.05em;
+	height: 1.05em;
+	flex-shrink: 0;
+}
+
+.souq-btn--primary {
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+}
+
+.souq-btn--primary:hover,
+.souq-btn--primary:focus-visible {
+	background: var(--souq-color-accent-deep);
+	color: var(--souq-color-ground);
+}
+
+/* Secondary sits beside primary in the dual-CTA row: same weight and height,
+   quieter fill, so "Add to bag" and "Buy it now" read as a pair. */
+.souq-btn--secondary {
+	background: var(--souq-color-accent-soft);
+	color: var(--souq-color-accent-deep);
+	border-color: transparent;
+}
+
+.souq-btn--secondary:hover,
+.souq-btn--secondary:focus-visible {
+	background: var(--souq-color-accent-soft-deep);
+}
+
+.souq-btn--outline {
+	background: transparent;
+	border-color: var(--souq-color-hairline);
+	color: var(--souq-color-ink);
+}
+
+.souq-btn--outline:hover,
+.souq-btn--outline:focus-visible {
+	border-color: var(--souq-color-ink);
+}
+
+.souq-btn--ghost {
+	background: none;
+	border: none;
+	min-height: 0;
+	padding: 0;
+	color: var(--souq-color-muted);
+	text-transform: none;
+	letter-spacing: normal;
+	font-size: 0.8125rem;
+	text-decoration: underline;
+	text-underline-offset: 0.22em;
+}
+
+.souq-btn--ghost:hover {
+	color: var(--souq-color-ink);
+}
+
+.souq-btn--full {
+	width: 100%;
+}
+
+.souq-btn:disabled,
+.souq-btn[aria-disabled="true"] {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   Badge: rectangular, sits over the top-left of product imagery
+   -------------------------------------------------------------------------- */
+
+.souq-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.3rem 0.6rem;
+	border-radius: 2px;
+	font-size: 0.625rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	line-height: 1;
+}
+
+.souq-badge--sale {
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+}
+
+.souq-badge--out {
+	background: var(--souq-color-ink);
+	color: var(--souq-color-ground);
+}
+
+/* --------------------------------------------------------------------------
+   Size selector: rectangular buttons, the apparel convention
+   -------------------------------------------------------------------------- */
+
+.souq-sizes {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+	gap: var(--souq-space-2xs);
+}
+
+.souq-size {
+	position: relative;
+	min-height: 2.875rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid transparent;
+	border-radius: var(--souq-radius-md);
+	background: var(--souq-color-accent-soft);
+	color: var(--souq-color-ink);
+	font-family: var(--souq-font-body);
+	font-size: 0.8125rem;
+	letter-spacing: 0.04em;
+	text-align: center;
+	cursor: pointer;
+	transition:
+		background-color var(--souq-duration-fast) var(--souq-ease),
+		color var(--souq-duration-fast) var(--souq-ease),
+		border-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-size:hover:not([data-available="false"]) {
+	background: var(--souq-color-accent-soft-deep);
+}
+
+.souq-size[aria-pressed="true"] {
+	background: var(--souq-color-accent);
+	border-color: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+}
+
+/* Unavailable sizes stay visible, focusable and announced, never removed:
+   a shopper needs to know the size exists but is sold out. */
+.souq-size[data-available="false"] {
+	background: transparent;
+	border-color: var(--souq-color-hairline);
+	color: var(--souq-color-muted);
+	cursor: not-allowed;
+	background-image: linear-gradient(
+		to top right,
+		transparent calc(50% - 0.5px),
+		var(--souq-color-hairline) 50%,
+		transparent calc(50% + 0.5px)
+	);
+}
+
+/* --------------------------------------------------------------------------
+   Colour swatches: square chips carrying the real garment colour
+   -------------------------------------------------------------------------- */
+
+.souq-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--souq-space-2xs);
+}
+
+.souq-swatch {
+	position: relative;
+	width: 1.75rem;
+	height: 1.75rem;
+	padding: 0;
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: 2px;
+	background-color: var(--souq-swatch-color, var(--souq-color-surface));
+	background-size: cover;
+	background-position: center;
+	cursor: pointer;
+	transition: border-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+/* Selection reads as a ring offset from the chip, so the colour itself is
+   never obscured by the indicator. */
+.souq-swatch::after {
+	content: "";
+	position: absolute;
+	inset: -4px;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	transition: border-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-swatch[aria-pressed="true"]::after {
+	border-color: var(--souq-color-ink);
+}
+
+.souq-swatch:hover::after {
+	border-color: var(--souq-color-hairline);
+}
+
+.souq-swatch[data-available="false"] {
+	cursor: not-allowed;
+	opacity: 0.5;
+	background-image: linear-gradient(
+		to top right,
+		transparent calc(50% - 0.5px),
+		var(--souq-color-ink) 50%,
+		transparent calc(50% + 0.5px)
+	);
+}
+
+/* Attribute row: label and the currently chosen value read as one line,
+   e.g. "Colour  Ivory" */
+.souq-attr {
+	margin-bottom: var(--souq-space-md);
+}
+
+.souq-attr__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--souq-space-sm);
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-attr__label {
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+}
+
+.souq-attr__value {
+	color: var(--souq-color-ink);
+	text-transform: none;
+	letter-spacing: normal;
+	font-size: 0.8125rem;
+}
+
+/* --------------------------------------------------------------------------
+   Accordion: the apparel PDP information pattern
+   -------------------------------------------------------------------------- */
+
+.souq-accordion {
+	border-top: 1px solid var(--souq-color-hairline);
+}
+
+.souq-accordion__item {
+	border-bottom: 1px solid var(--souq-color-hairline);
+}
+
+.souq-accordion__trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--souq-space-sm);
+	width: 100%;
+	padding: var(--souq-space-sm) 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	text-align: left;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-ink);
+}
+
+.souq-accordion__icon {
+	flex-shrink: 0;
+	width: 0.875rem;
+	height: 0.875rem;
+	color: var(--souq-color-muted);
+	transition: transform var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-accordion__trigger[aria-expanded="true"] .souq-accordion__icon {
+	transform: rotate(180deg);
+}
+
+.souq-accordion__panel {
+	padding-bottom: var(--souq-space-md);
+}
+
+.souq-accordion__panel[hidden] {
+	display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Measurement tables (size guide). Multiple named sections per garment,
+   e.g. a co-ord set lists Kameez and Salwar separately.
+   -------------------------------------------------------------------------- */
+
+.souq-measure-group + .souq-measure-group {
+	margin-top: var(--souq-space-md);
+}
+
+.souq-measure-group__title {
+	font-family: var(--souq-font-body);
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-measure-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+	font-size: 0.8125rem;
+}
+
+.souq-measure-table th,
+.souq-measure-table td {
+	border: 1px solid var(--souq-color-hairline);
+	padding: 0.5rem 0.625rem;
+	text-align: center;
+}
+
+.souq-measure-table thead th {
+	background: var(--souq-color-sand);
+	font-weight: 500;
+	font-size: 0.75rem;
+	letter-spacing: 0.02em;
+}
+
+.souq-measure-note {
+	margin-top: var(--souq-space-2xs);
+	font-size: 0.75rem;
+	color: var(--souq-color-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Form controls
+   -------------------------------------------------------------------------- */
+
+.souq-input,
+.souq-select,
+.souq-textarea {
+	width: 100%;
+	min-height: 3rem;
+	padding: 0.75rem 0.875rem;
+	background: var(--souq-color-ground);
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	font-family: var(--souq-font-body);
+	font-size: 0.9375rem;
+	color: var(--souq-color-ink);
+	transition: border-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-input:focus,
+.souq-select:focus,
+.souq-textarea:focus {
+	border-color: var(--souq-color-accent);
+	outline: none;
+}
+
+.souq-field__label {
+	display: block;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-3xs);
+}
+
+/* Quantity stepper */
+
+.souq-qty {
+	display: inline-flex;
+	align-items: stretch;
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	overflow: hidden;
+}
+
+.souq-qty__btn {
+	width: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	color: var(--souq-color-ink);
+}
+
+.souq-qty__btn:hover {
+	background: var(--souq-color-surface);
+}
+
+.souq-qty__input {
+	width: 2.75rem;
+	border: none;
+	border-inline: 1px solid var(--souq-color-hairline);
+	text-align: center;
+	font-family: var(--souq-font-body);
+	font-size: 0.875rem;
+	background: transparent;
+	color: var(--souq-color-ink);
+	-moz-appearance: textfield;
+}
+
+.souq-qty__input::-webkit-outer-spin-button,
+.souq-qty__input::-webkit-inner-spin-button {
+	appearance: none;
+	margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Overlays (search panel, drawers)
+   -------------------------------------------------------------------------- */
+
+.souq-overlay-backdrop {
+	position: fixed;
+	inset: 0;
+	background: color-mix(in oklab, var(--souq-color-ink) 40%, transparent);
+	z-index: 900;
+}
+
+.souq-overlay-panel {
+	background: var(--souq-color-ground);
+	border-radius: var(--souq-radius-md);
+	box-shadow: var(--souq-shadow-overlay);
+}
+
+/* --------------------------------------------------------------------------
+   Price
+   -------------------------------------------------------------------------- */
+
+.souq-price {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	font-size: 0.8125rem;
+	letter-spacing: 0.01em;
+}
+
+.souq-price del,
+.souq-price .souq-price__was {
+	color: var(--souq-color-muted);
+	text-decoration: line-through;
+	font-size: 0.75rem;
+}
+
+.souq-price ins {
+	text-decoration: none;
+}

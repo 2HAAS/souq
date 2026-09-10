@@ -1,0 +1,115 @@
+/*
+Theme Name: Souq
+Theme URI: https://github.com/2HAAS/souq
+Author: 2HAAS
+Author URI: https://2haas.com
+Description: A modular, fully re-skinnable WooCommerce storefront theme for fashion and apparel. Editorial photography-led layouts, a card-less product grid, and a complete garment purchase panel (size/colour selection, multi-section size guide, care details). Every colour, typeface, logo and section is editable from wp-admin. WooCommerce 8.0+ required.
+Version: 0.2.4
+Requires at least: 6.4
+Requires PHP: 8.0
+Tested up to: 6.9
+WC requires at least: 8.0
+WC tested up to: 11.0
+Text Domain: souq
+License: GNU General Public License v2 or later
+License URI: LICENSE
+*/
+
+/* ==========================================================================
+   Design tokens.
+
+   Colour doctrine (DESIGN.md): the photography is the palette. The interface
+   is a quiet warm-cream ground with a single spent accent, so the garments
+   carry all the colour. Every token below is overridable at runtime by
+   inc/class-souq-customizer.php, which prints a :root block in wp_head.
+
+   Hex first as a fallback layer, then the normative oklch() value.
+   ========================================================================== */
+
+:root {
+	/* --- Accent: the one spent colour (The One Spend Rule) --- */
+	--souq-color-accent: #8b4a38;
+	--souq-color-accent: oklch(42% 0.11 35);
+	--souq-color-accent-deep: #6f3a2b;
+	--souq-color-accent-deep: oklch(34% 0.1 35);
+	/* Quiet tint of the accent: unselected size buttons, soft fills. Derived
+	   from the accent hue so a re-skin carries it automatically. */
+	--souq-color-accent-soft: #f6ebe6;
+	--souq-color-accent-soft: oklch(95% 0.014 35);
+	--souq-color-accent-soft-deep: #ecd9d1;
+	--souq-color-accent-soft-deep: oklch(90% 0.024 35);
+
+	/* --- Neutrals: warm cream ground, never pure black or white --- */
+	--souq-color-ground: #fdfaf3;
+	--souq-color-ground: oklch(98% 0.009 85);
+	--souq-color-surface: #f6f1e6;
+	--souq-color-surface: oklch(95% 0.014 85);
+	--souq-color-ink: #26221e;
+	--souq-color-ink: oklch(21% 0.008 60);
+	--souq-color-muted: #83786c;
+	--souq-color-muted: oklch(56% 0.014 70);
+	--souq-color-hairline: #e2d9ca;
+	--souq-color-hairline: oklch(89% 0.014 80);
+
+	/* --- Support --- */
+	--souq-color-sand: #f0dcc0;
+	--souq-color-sand: oklch(90% 0.045 75);
+	--souq-color-success: #3d6b4c;
+	--souq-color-success: oklch(45% 0.09 145);
+	--souq-color-error: #9c3226;
+	--souq-color-error: oklch(48% 0.16 25);
+
+	/* --- Typography ---
+	   Display: high-contrast serif at light weight (The Serif-Never-Shouts
+	   Rule). UI: geometric sans, uppercase and letterspaced for labels. */
+	--souq-font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+	--souq-font-body: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--souq-tracking-label: 0.12em;
+	--souq-tracking-wordmark: 0.24em;
+
+	/* --- Spacing --- */
+	--souq-space-3xs: 0.25rem;
+	--souq-space-2xs: 0.5rem;
+	--souq-space-xs: 0.75rem;
+	--souq-space-sm: 1rem;
+	--souq-space-md: 1.5rem;
+	--souq-space-lg: 2.5rem;
+	--souq-space-xl: 4rem;
+	--souq-space-2xl: 6rem;
+	--souq-space-3xl: 9rem;
+
+	/* --- Shape: near-square, editorial rather than app-like --- */
+	--souq-radius-sm: 3px;
+	--souq-radius-md: 4px;
+
+	/* --- Elevation: flat at rest; shadow is a response to state only --- */
+	--souq-shadow-hover: 0 12px 28px -14px oklch(21% 0.008 60 / 0.2);
+	--souq-shadow-overlay: 0 18px 44px -18px oklch(21% 0.008 60 / 0.3);
+	--souq-shadow-float: 0 8px 30px -8px oklch(21% 0.008 60 / 0.22);
+
+	/* --- Motion --- */
+	--souq-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--souq-duration-fast: 150ms;
+	--souq-duration-base: 260ms;
+
+	/* --- Layout --- */
+	--souq-content-width: 88rem;
+	--souq-measure: 68ch;
+	--souq-header-height: 3.5rem;
+	--souq-gutter: 1.25rem;
+	--souq-grid-columns: 4;
+	--souq-card-aspect: 4 / 5;
+}
+
+@media (min-width: 782px) {
+	:root {
+		--souq-gutter: 2.5rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--souq-duration-fast: 0ms;
+		--souq-duration-base: 0ms;
+	}
+}

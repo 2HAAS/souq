@@ -1,0 +1,389 @@
+/* ==========================================================================
+   WooCommerce baseline. Souq disables WC's bundled stylesheet
+   (woocommerce_enqueue_styles => []) so every structural element WC renders
+   through its own default templates (cart, checkout, account, archive loop)
+   is restyled here against our tokens instead of WC's default look.
+
+   Scope note: this is baseline coverage, not the full shop-archive /
+   cart / checkout polish pass (that lands in the next build pass per the
+   design brief). It exists so those pages are coherent today, not broken.
+   ========================================================================== */
+
+/* ==========================================================================
+   Archive header and toolbar
+   ========================================================================== */
+
+.woocommerce-products-header__title {
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.woocommerce-products-header .term-description {
+	max-width: var(--souq-measure);
+	color: var(--souq-color-muted);
+	font-size: 0.9375rem;
+}
+
+/* Customizer: "Archive page heading" set to Centred. Targets WooCommerce's
+   own `.woocommerce-products-header` (the wrapper around the "Shop"/category
+   `<h1>` and its description) — not the result-count/sorting row below it,
+   which is a separate element and stays left-aligned regardless. */
+body.souq-archive-heading-center .woocommerce-products-header {
+	text-align: center;
+}
+
+body.souq-archive-heading-center .woocommerce-products-header .term-description {
+	margin-inline: auto;
+}
+
+/* Count left, sorting right, hairline beneath. By default WooCommerce stacks
+   both on the left, leaving most of the row empty and squeezing the controls
+   against the first row of products. Only printed at all when at least one
+   of the two is enabled (souq_archive_show_result_count /
+   souq_archive_show_sorting) — see toolbar_start() — so a shop that hides
+   both doesn't get an empty bordered strip. */
+.souq-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--souq-space-sm);
+	margin-block: var(--souq-space-lg) var(--souq-space-lg);
+	padding-bottom: var(--souq-space-2xs);
+	border-bottom: 1px solid var(--souq-color-hairline);
+}
+
+.woocommerce .souq-toolbar .woocommerce-result-count {
+	margin: 0;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+}
+
+.woocommerce .souq-toolbar .woocommerce-ordering {
+	margin: 0;
+}
+
+/* The sorting select is the one control WooCommerce renders with raw browser
+   chrome. Strip it and draw the caret from two gradients so it inherits the
+   ink token rather than being baked into an image asset. */
+.woocommerce .souq-toolbar select.orderby {
+	appearance: none;
+	-webkit-appearance: none;
+	margin: 0;
+	padding: 0.35rem 1.5rem 0.35rem 0;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+	background-image:
+		linear-gradient(45deg, transparent 50%, currentColor 50%),
+		linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position:
+		right 0.5rem center,
+		right 0.25rem center;
+	background-size: 0.28rem 0.28rem, 0.28rem 0.28rem;
+	background-repeat: no-repeat;
+	font-family: var(--souq-font-body);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-ink);
+	cursor: pointer;
+}
+
+.woocommerce .souq-toolbar select.orderby:focus-visible {
+	outline: 2px solid var(--souq-color-accent);
+	outline-offset: 3px;
+}
+
+/* The dropdown list is drawn by the OS, so give it explicit colours instead
+   of letting it inherit a transparent background. */
+.woocommerce .souq-toolbar select.orderby option {
+	background: var(--souq-color-ground);
+	color: var(--souq-color-ink);
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.souq-breadcrumbs {
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-md);
+}
+
+.souq-breadcrumbs a {
+	color: var(--souq-color-muted);
+	text-decoration: none;
+}
+
+.souq-breadcrumbs a:hover {
+	color: var(--souq-color-accent);
+}
+
+/* Notices */
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info,
+.woocommerce-noreviews {
+	list-style: none;
+	margin: 0 0 var(--souq-space-md);
+	padding: var(--souq-space-sm) var(--souq-space-md);
+	border-radius: var(--souq-radius-sm);
+	background: var(--souq-color-surface);
+	border: 1px solid var(--souq-color-sand);
+	font-size: 0.9375rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--souq-space-sm);
+	flex-wrap: wrap;
+}
+
+.woocommerce-error {
+	border-color: var(--souq-color-error);
+	background: color-mix(in oklab, var(--souq-color-error) 8%, var(--souq-color-ground));
+}
+
+.woocommerce-message::before,
+.woocommerce-error::before,
+.woocommerce-info::before {
+	content: none;
+}
+
+/* Buttons: map WooCommerce's default classes onto souq-btn styling. */
+
+.woocommerce a.button,
+.woocommerce button.button,
+.woocommerce input.button,
+.woocommerce #respond input#submit,
+.woocommerce-message .button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	appearance: none;
+	border: 1px solid transparent;
+	border-radius: var(--souq-radius-sm);
+	padding: 0.875rem 1.75rem;
+	font-family: var(--souq-font-body);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+	cursor: pointer;
+	transition: background-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.woocommerce input.button:hover {
+	background: var(--souq-color-accent-deep);
+	color: var(--souq-color-ground);
+}
+
+.woocommerce a.button.alt,
+.woocommerce #respond input#submit.alt {
+	background: var(--souq-color-ink);
+}
+
+/* Forms: cart, checkout, my-account, login/register all use these classes. */
+
+.woocommerce form .form-row label {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+	margin-bottom: var(--souq-space-3xs);
+}
+
+.woocommerce form .form-row input.input-text,
+.woocommerce form .form-row textarea,
+.woocommerce form .form-row select,
+.woocommerce-page table.shop_table td select {
+	width: 100%;
+	background: var(--souq-color-ground);
+	border: 1px solid var(--souq-color-sand);
+	border-radius: var(--souq-radius-sm);
+	padding: 0.75rem 0.875rem;
+	font-family: var(--souq-font-body);
+	font-size: 1rem;
+	color: var(--souq-color-ink);
+}
+
+.woocommerce form .form-row input.input-text:focus,
+.woocommerce form .form-row textarea:focus,
+.woocommerce form .form-row select:focus {
+	border-color: var(--souq-color-accent);
+	outline: none;
+}
+
+.select2-container .select2-selection--single {
+	height: auto !important;
+	border: 1px solid var(--souq-color-sand) !important;
+	border-radius: var(--souq-radius-sm) !important;
+	padding: 0.5rem 0.5rem !important;
+}
+
+/* Tables: cart, my-account orders */
+
+.woocommerce table.shop_table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: var(--souq-space-md);
+}
+
+.woocommerce table.shop_table th,
+.woocommerce table.shop_table td {
+	padding: var(--souq-space-sm);
+	border-bottom: 1px solid var(--souq-color-sand);
+	text-align: left;
+	font-size: 0.9375rem;
+}
+
+.woocommerce table.shop_table th {
+	font-size: 0.75rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: var(--souq-color-muted);
+}
+
+.woocommerce table.shop_table td.product-thumbnail img {
+	width: 4rem;
+	border-radius: var(--souq-radius-sm);
+}
+
+/* Price */
+
+.woocommerce .price {
+	font-weight: 500;
+	color: var(--souq-color-ink);
+}
+
+.woocommerce .price del {
+	color: var(--souq-color-muted);
+	text-decoration: line-through;
+	margin-right: var(--souq-space-2xs);
+	font-weight: 400;
+}
+
+.woocommerce .price ins {
+	text-decoration: none;
+	color: var(--souq-color-accent);
+}
+
+.woocommerce span.onsale {
+	position: absolute;
+	top: var(--souq-space-2xs);
+	left: var(--souq-space-2xs);
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.625rem;
+	border-radius: 999px;
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+	font-size: 0.6875rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	z-index: 2;
+}
+
+/* Ratings: out of scope for this pass (no reviews UX defined yet in
+   DESIGN.md); hidden rather than shipped half-styled. */
+.woocommerce .star-rating,
+.woocommerce .woocommerce-product-rating {
+	display: none;
+}
+
+/* Baseline product loop grid (shop archive gets its own full pass next;
+   this keeps the default WC loop presentable in the meantime). */
+
+.woocommerce ul.products {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--souq-space-md);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+@media (min-width: 600px) {
+	.woocommerce ul.products {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.woocommerce ul.products {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+.woocommerce ul.products li.product {
+	position: relative;
+	background: var(--souq-color-ground);
+	border-radius: var(--souq-radius-sm);
+	transition: box-shadow var(--souq-duration-base) var(--souq-ease);
+}
+
+.woocommerce ul.products li.product:hover {
+	box-shadow: var(--souq-shadow-hover);
+}
+
+.woocommerce ul.products li.product a {
+	text-decoration: none;
+	color: var(--souq-color-ink);
+	display: block;
+}
+
+.woocommerce ul.products li.product img {
+	border-radius: var(--souq-radius-sm) var(--souq-radius-sm) 0 0;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+}
+
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+	font-family: var(--souq-font-body);
+	font-size: 0.9375rem;
+	font-weight: 500;
+	padding: var(--souq-space-sm) var(--souq-space-sm) 0;
+	margin: 0;
+}
+
+.woocommerce ul.products li.product .price {
+	display: block;
+	padding: var(--souq-space-3xs) var(--souq-space-sm) var(--souq-space-sm);
+	font-size: 0.9375rem;
+}
+
+.woocommerce-pagination ul {
+	display: flex;
+	gap: var(--souq-space-2xs);
+	list-style: none;
+	padding: 0;
+	margin: var(--souq-space-lg) 0 0;
+}
+
+.woocommerce-pagination a,
+.woocommerce-pagination span {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border: 1px solid var(--souq-color-sand);
+	border-radius: var(--souq-radius-sm);
+	text-decoration: none;
+	color: var(--souq-color-ink);
+	font-size: 0.875rem;
+}
+
+.woocommerce-pagination .current {
+	background: var(--souq-color-accent);
+	border-color: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+}

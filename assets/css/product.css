@@ -1,0 +1,570 @@
+/* ==========================================================================
+   Single product. Gallery flush to the left viewport edge, purchase panel
+   sticky alongside it.
+   ========================================================================== */
+
+.souq-product-wrap {
+	padding-bottom: var(--souq-space-2xl);
+}
+
+.souq-product__layout {
+	display: grid;
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 1000px) {
+	.souq-product__layout {
+		grid-template-columns: minmax(0, 1.15fr) minmax(24rem, 0.85fr);
+		align-items: start;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Gallery
+   -------------------------------------------------------------------------- */
+
+.souq-product__gallery {
+	position: relative;
+	background: var(--souq-color-surface);
+	overflow: hidden;
+	max-width: 100%;
+}
+
+/* The gallery pins for the height of its own column and travels with the
+   page beneath it — one scrollbar, page scroll only. Previously it was the
+   *purchase panel* that was sticky with its own `overflow-y: auto`, which
+   produced a second, independent scroll region: reaching it meant moving the
+   cursor over that exact column, and the page's own scrollbar stopped
+   applying to it. Standard sticky-sidebar CSS reproduces the desired
+   behaviour without any scroll-driven JS: `align-items: start` on the grid
+   (below) lets each column keep its own height, the row is then as tall as
+   whichever column has more content (almost always the panel, once
+   description/details are open), and the shorter sticky column simply
+   scrolls away with the rest of the page the moment the row's bottom edge
+   reaches it — "only at the end of the panel does the whole page move"
+   falls out of the browser's own sticky/grid layout, nothing to wire up. */
+@media (min-width: 1000px) {
+	.souq-product__gallery {
+		position: sticky;
+		top: var(--souq-header-actual, var(--souq-header-height));
+		display: flex;
+		flex-direction: column;
+		height: calc(100vh - var(--souq-header-actual, var(--souq-header-height)));
+	}
+
+	/* The gallery markup (.souq-gallery, from product-image.php) is the sole
+	   child of the sticky column above — stretch it to fill that height so
+	   its own stage/thumbs flex sizing (below) has something to divide. */
+	.souq-product__gallery .souq-gallery {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+}
+
+/* Stage: slides stacked and cross-faded, so the shopper always sees one
+   image at full size with the rest a click away. */
+.souq-gallery__stage {
+	position: relative;
+	aspect-ratio: var(--souq-card-aspect);
+	overflow: hidden;
+}
+
+/* At a 4:5 ratio a full-width column renders taller than the viewport, which
+   pushes the counter and thumbnails below the fold and drops the arrows near
+   the bottom edge. On desktop the gallery column is now a fixed-height flex
+   column (see .souq-product__gallery) sized to the screen, so the stage
+   simply fills whatever height the thumbnail strip leaves it rather than
+   computing its own — capping max-height while keeping aspect-ratio would
+   shrink the box on both axes and leave empty ground beside the image. The
+   image itself covers. */
+@media (min-width: 1000px) {
+	.souq-gallery__stage {
+		aspect-ratio: auto;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+}
+
+.souq-gallery__slide {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	opacity: 0;
+	transition: opacity var(--souq-duration-base) var(--souq-ease);
+	pointer-events: none;
+}
+
+.souq-gallery__slide.is-active {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.souq-gallery__image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.souq-gallery--empty img {
+	width: 100%;
+	aspect-ratio: var(--souq-card-aspect);
+	object-fit: cover;
+}
+
+/* Nav: always present on the gallery (unlike the card, where it is a hover
+   affordance) because discovering the other images is the primary job here. */
+.souq-gallery__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	padding: 0;
+	transform: translateY(-50%);
+	border: none;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--souq-color-ground) 88%, transparent);
+	color: var(--souq-color-ink);
+	cursor: pointer;
+	transition: background-color var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-gallery__nav:hover {
+	background: var(--souq-color-ground);
+}
+
+.souq-gallery__nav--prev {
+	left: var(--souq-space-sm);
+}
+
+.souq-gallery__nav--next {
+	right: var(--souq-space-sm);
+}
+
+.souq-gallery__counter {
+	position: absolute;
+	bottom: var(--souq-space-sm);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 3;
+	padding: 0.25rem 0.7rem;
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--souq-color-ink) 62%, transparent);
+	color: var(--souq-color-ground);
+	font-size: 0.6875rem;
+	letter-spacing: 0.04em;
+}
+
+/* Thumbnails sit immediately under the stage, in view rather than below the
+   fold, so the image count is obvious without scrolling. */
+.souq-gallery__thumbs {
+	display: flex;
+	gap: var(--souq-space-3xs);
+	padding: var(--souq-space-3xs);
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.souq-gallery__thumb {
+	flex: 0 0 4.5rem;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	opacity: 0.5;
+	transition: opacity var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-gallery__thumb img {
+	width: 100%;
+	aspect-ratio: var(--souq-card-aspect);
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+}
+
+.souq-gallery__thumb.is-active,
+.souq-gallery__thumb:hover {
+	opacity: 1;
+}
+
+.souq-gallery__thumb.is-active img {
+	outline: 1px solid var(--souq-color-ink);
+	outline-offset: -1px;
+}
+
+/* --------------------------------------------------------------------------
+   Purchase panel
+   -------------------------------------------------------------------------- */
+
+.souq-product__panel {
+	padding: var(--souq-space-lg) var(--souq-gutter) var(--souq-space-xl);
+}
+
+/* Deliberately NOT sticky and NOT its own scroll region — see the note on
+   .souq-product__gallery above. This panel is ordinary in-flow content; the
+   gallery beside it is the one that pins, and only this column's own length
+   determines how far the page scrolls before the gallery scrolls away too. */
+@media (min-width: 1000px) {
+	.souq-product__panel {
+		padding-block: var(--souq-space-xl);
+		/* Optical: the gallery is flush left, so the panel needs breathing
+		   room on both sides rather than the page gutter alone. */
+		padding-inline: clamp(1.5rem, 3vw, 3rem);
+	}
+}
+
+.souq-product__summary {
+	max-width: 32rem;
+}
+
+.souq-product__summary .product_title {
+	font-family: var(--souq-font-display);
+	font-size: clamp(1.75rem, 2.4vw, 2.25rem);
+	font-weight: 300;
+	line-height: 1.15;
+	margin: 0 0 var(--souq-space-2xs);
+}
+
+.souq-product__summary .price {
+	display: block;
+	margin-bottom: var(--souq-space-md);
+	font-size: 0.9375rem;
+	color: var(--souq-color-ink);
+}
+
+.souq-product__summary .price del {
+	color: var(--souq-color-muted);
+	margin-left: 0.35rem;
+	font-size: 0.875rem;
+}
+
+.souq-product__summary .price ins {
+	text-decoration: none;
+	color: var(--souq-color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Variation form
+   -------------------------------------------------------------------------- */
+
+.souq-variations .variations {
+	margin-bottom: var(--souq-space-sm);
+}
+
+/* Collapses to nothing until WooCommerce reveals the reset link. Reserving
+   height here left a visible dead gap above the CTA before any selection. */
+.souq-variations__foot:not(:has(.reset_variations:not([style*="visibility: hidden"]))) {
+	margin: 0;
+}
+
+.souq-variations__foot {
+	margin-bottom: var(--souq-space-2xs);
+}
+
+/* WooCommerce toggles this link's visibility; keep it quiet when shown. */
+.reset_variations {
+	font-size: 0.75rem;
+	color: var(--souq-color-muted);
+	text-decoration: underline;
+	text-underline-offset: 0.22em;
+}
+
+.reset_variations:hover {
+	color: var(--souq-color-ink);
+}
+
+.single_variation_wrap {
+	margin-top: var(--souq-space-sm);
+}
+
+.woocommerce-variation-price {
+	margin-bottom: var(--souq-space-2xs);
+	font-size: 1rem;
+}
+
+.woocommerce-variation-availability {
+	margin-bottom: var(--souq-space-sm);
+	font-size: 0.8125rem;
+}
+
+.woocommerce-variation-availability .stock.in-stock {
+	color: var(--souq-color-success);
+}
+
+.woocommerce-variation-availability .stock.out-of-stock {
+	color: var(--souq-color-error);
+}
+
+/* Buy box */
+
+.souq-buybox__row {
+	display: flex;
+	align-items: stretch;
+	gap: var(--souq-space-2xs);
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-buybox__row .quantity {
+	flex-shrink: 0;
+}
+
+.souq-buybox__row .single_add_to_cart_button {
+	flex: 1;
+}
+
+/* WooCommerce renders its own quantity markup; align it to our stepper. */
+.quantity input.qty {
+	width: 3.5rem;
+	height: 3rem;
+	padding: 0 0.25rem;
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	background: transparent;
+	text-align: center;
+	font-family: var(--souq-font-body);
+	font-size: 0.875rem;
+	color: var(--souq-color-ink);
+	-moz-appearance: textfield;
+}
+
+.quantity input.qty::-webkit-outer-spin-button,
+.quantity input.qty::-webkit-inner-spin-button {
+	appearance: none;
+	margin: 0;
+}
+
+/* Simple (non-variable) products */
+
+.souq-product__summary form.cart:not(.variations_form) {
+	display: flex;
+	align-items: stretch;
+	flex-wrap: wrap;
+	gap: var(--souq-space-2xs);
+	margin-bottom: var(--souq-space-md);
+}
+
+.souq-product__summary form.cart:not(.variations_form) .single_add_to_cart_button {
+	flex: 1;
+	min-width: 12rem;
+}
+
+/* --------------------------------------------------------------------------
+   Accordion contents
+   -------------------------------------------------------------------------- */
+
+.souq-accordion {
+	margin-top: var(--souq-space-lg);
+}
+
+.souq-specs {
+	margin: 0;
+}
+
+.souq-spec {
+	display: flex;
+	gap: var(--souq-space-sm);
+	padding-block: 0.4rem;
+	border-bottom: 1px solid color-mix(in oklab, var(--souq-color-hairline) 55%, transparent);
+	font-size: 0.8125rem;
+}
+
+.souq-spec:last-child {
+	border-bottom: none;
+}
+
+.souq-spec__label {
+	flex: 0 0 9rem;
+	margin: 0;
+	color: var(--souq-color-muted);
+}
+
+.souq-spec__value {
+	margin: 0;
+}
+
+/* Wide measurement tables scroll inside their own container rather than
+   forcing the panel to scroll horizontally. */
+.souq-measure-scroll {
+	overflow-x: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky add-to-bag bar: a floating card, not a full-width slab
+   -------------------------------------------------------------------------- */
+
+.souq-sticky-cta {
+	position: fixed;
+	left: 50%;
+	bottom: var(--souq-space-sm);
+	z-index: 400;
+	width: min(46rem, calc(100vw - 2 * var(--souq-gutter)));
+	transform: translate(-50%, calc(100% + var(--souq-space-lg)));
+	background: var(--souq-color-ground);
+	border: 1px solid var(--souq-color-hairline);
+	border-radius: var(--souq-radius-md);
+	box-shadow: var(--souq-shadow-float);
+	padding: var(--souq-space-2xs);
+	transition: transform var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-sticky-cta.is-visible {
+	transform: translate(-50%, 0);
+}
+
+.souq-sticky-cta__row {
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-sm);
+}
+
+.souq-sticky-cta__thumb {
+	flex-shrink: 0;
+	width: 2.75rem;
+	height: 3.4rem;
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+}
+
+.souq-sticky-cta__text {
+	flex: 1;
+	min-width: 0;
+}
+
+.souq-sticky-cta__name {
+	display: block;
+	font-size: 0.8125rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.souq-sticky-cta__variant {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-sticky-cta__price {
+	flex-shrink: 0;
+	font-size: 0.8125rem;
+	white-space: nowrap;
+}
+
+.souq-sticky-cta__button {
+	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.souq-sticky-cta__thumb,
+	.souq-sticky-cta__price {
+		display: none;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   Recommended products accordion
+   -------------------------------------------------------------------------- */
+
+.souq-recommend {
+	padding-top: var(--souq-space-2xl);
+}
+
+.souq-recommend__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--souq-color-hairline);
+}
+
+.souq-recommend__item {
+	border-bottom: 1px solid var(--souq-color-hairline);
+}
+
+.souq-recommend__item.is-hidden-elsewhere {
+	display: none;
+}
+
+.souq-recommend__header {
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-sm);
+	width: 100%;
+	padding: var(--souq-space-sm) 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	text-align: left;
+	color: var(--souq-color-ink);
+}
+
+.souq-recommend__thumb {
+	flex-shrink: 0;
+	width: 3rem;
+	height: 3.75rem;
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+}
+
+.souq-recommend__name {
+	flex: 1;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+}
+
+.souq-recommend__price {
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-recommend__chevron {
+	flex-shrink: 0;
+	width: 0.875rem;
+	height: 0.875rem;
+	color: var(--souq-color-muted);
+	transition: transform var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-recommend__header[aria-expanded="true"] .souq-recommend__chevron {
+	transform: rotate(180deg);
+}
+
+.souq-recommend__panel {
+	padding-bottom: var(--souq-space-md);
+}
+
+.souq-recommend__panel[hidden] {
+	display: none;
+}
+
+.souq-recommend__panel-inner {
+	display: flex;
+	gap: var(--souq-space-md);
+	padding-left: calc(3rem + var(--souq-space-sm));
+}
+
+.souq-recommend__panel-image {
+	flex-shrink: 0;
+	width: 8rem;
+	aspect-ratio: var(--souq-card-aspect);
+	object-fit: cover;
+	border-radius: var(--souq-radius-sm);
+}
+
+.souq-recommend__excerpt {
+	margin-bottom: var(--souq-space-sm);
+	font-size: 0.875rem;
+	color: var(--souq-color-muted);
+}
+
+@media (max-width: 640px) {
+	.souq-recommend__panel-inner {
+		flex-direction: column;
+		padding-left: 0;
+	}
+}

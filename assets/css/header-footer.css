@@ -1,0 +1,661 @@
+/* ==========================================================================
+   Announcement bar
+   ========================================================================== */
+
+.souq-announcement {
+	background: var(--souq-color-ink);
+	color: var(--souq-color-ground);
+	text-align: center;
+}
+
+.souq-announcement__text {
+	display: block;
+	margin: 0;
+	padding-block: 0.5rem;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	color: inherit;
+	text-decoration: none;
+}
+
+a.souq-announcement__text:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+/* ==========================================================================
+   Header. One markup order, four layouts: the presets only reassign grid
+   areas and alignment, so no control is ever hidden by a layout change.
+   ========================================================================== */
+
+.souq-header {
+	position: relative;
+	z-index: 500;
+	background: var(--souq-color-ground);
+	border-bottom: 1px solid transparent;
+	transition:
+		border-color var(--souq-duration-base) var(--souq-ease),
+		background-color var(--souq-duration-base) var(--souq-ease),
+		color var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-header--sticky {
+	position: sticky;
+	top: 0;
+}
+
+/* The hairline only appears once the page has scrolled, so the header sits
+   silently over the hero at rest. */
+.souq-header.is-stuck {
+	border-bottom-color: var(--souq-color-hairline);
+}
+
+.souq-header__bar {
+	display: grid;
+	align-items: center;
+	gap: var(--souq-space-sm);
+	min-height: var(--souq-header-height);
+	grid-template-areas: "nav brand actions";
+	grid-template-columns: 1fr auto 1fr;
+}
+
+.souq-header__zone {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+
+.souq-header__zone--nav {
+	grid-area: nav;
+	justify-content: flex-start;
+}
+
+.souq-header__zone--brand {
+	grid-area: brand;
+	justify-content: center;
+}
+
+.souq-header__zone--actions {
+	grid-area: actions;
+	justify-content: flex-end;
+	gap: var(--souq-space-xs);
+}
+
+/* --- Classic: brand left, navigation centred --- */
+
+@media (min-width: 900px) {
+	.souq-header--classic .souq-header__bar {
+		grid-template-areas: "brand nav actions";
+		grid-template-columns: 1fr auto 1fr;
+	}
+
+	.souq-header--classic .souq-header__zone--brand {
+		justify-content: flex-start;
+	}
+
+	.souq-header--classic .souq-header__zone--nav {
+		justify-content: center;
+	}
+}
+
+/* --- Stacked: brand centred on its own row, navigation beneath --- */
+
+.souq-header--stacked .souq-header__bar {
+	grid-template-areas: "nav brand actions";
+	grid-template-columns: 1fr auto 1fr;
+}
+
+.souq-header__row--nav {
+	display: none;
+}
+
+@media (min-width: 900px) {
+	.souq-header--stacked .souq-header__bar {
+		min-height: 0;
+		padding-top: var(--souq-space-sm);
+	}
+
+	.souq-header--stacked .souq-header__zone--brand .souq-wordmark__text {
+		font-size: 1.75rem;
+	}
+
+	.souq-header__row--nav {
+		display: flex;
+		justify-content: center;
+		padding-bottom: var(--souq-space-2xs);
+	}
+
+	.souq-header--stacked .souq-header__nav--stacked {
+		display: block;
+	}
+}
+
+/* --- Minimal: brand left, everything else behind the menu button --- */
+
+.souq-header--minimal .souq-header__bar {
+	grid-template-areas: "nav brand actions";
+	grid-template-columns: auto 1fr auto;
+}
+
+@media (min-width: 900px) {
+	.souq-header--minimal .souq-header__zone--brand {
+		justify-content: flex-start;
+		padding-left: var(--souq-space-2xs);
+	}
+}
+
+/* --- Transparent overlay on the homepage hero --- */
+
+.souq-header--transparent {
+	background: transparent;
+	color: var(--souq-color-ground);
+}
+
+.souq-header--transparent .souq-wordmark,
+.souq-header--transparent .souq-nav a,
+.souq-header--transparent .souq-header__action,
+.souq-header--transparent .souq-header__toggle {
+	color: inherit;
+}
+
+/* Once the page scrolls the header must become readable against content
+   again, so it reverts to the solid ground colour. */
+.souq-header--transparent.is-stuck {
+	background: var(--souq-color-ground);
+	color: var(--souq-color-ink);
+}
+
+/* Wordmark */
+
+.souq-wordmark {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+.souq-wordmark__text {
+	font-family: var(--souq-font-display);
+	font-size: 1.375rem;
+	font-weight: 400;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.souq-wordmark__image {
+	max-height: 2.25rem;
+	width: auto;
+}
+
+/* Nav */
+
+.souq-header__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	margin-left: -0.5rem;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--souq-color-ink);
+}
+
+.souq-header__nav {
+	display: none;
+}
+
+.souq-nav {
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-md);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.souq-nav a {
+	position: relative;
+	display: inline-block;
+	padding-block: 0.35rem;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	text-decoration: none;
+	color: var(--souq-color-ink);
+	white-space: nowrap;
+}
+
+/* Underline grows from the left on hover; never a background fill. */
+.souq-nav a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 100%;
+	bottom: 0.1rem;
+	height: 1px;
+	background: currentColor;
+	transition: right var(--souq-duration-base) var(--souq-ease);
+}
+
+.souq-nav a:hover::after,
+.souq-nav .current-menu-item > a::after,
+.souq-nav .current_page_item > a::after {
+	right: 0;
+}
+
+/* Actions */
+
+.souq-header__action {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--souq-color-ink);
+	text-decoration: none;
+	transition: opacity var(--souq-duration-fast) var(--souq-ease);
+}
+
+.souq-header__action:hover {
+	opacity: 0.6;
+}
+
+.souq-header__action--account {
+	display: none;
+}
+
+.souq-cart-count {
+	position: absolute;
+	top: 0;
+	right: 0;
+	min-width: 1rem;
+	height: 1rem;
+	padding: 0 0.2rem;
+	border-radius: 999px;
+	background: var(--souq-color-accent);
+	color: var(--souq-color-ground);
+	font-size: 0.5625rem;
+	line-height: 1rem;
+	text-align: center;
+}
+
+.souq-cart-count[aria-hidden="true"] {
+	display: none;
+}
+
+@media (min-width: 900px) {
+	.souq-header__toggle {
+		display: none;
+	}
+
+	.souq-header__nav {
+		display: block;
+	}
+
+	.souq-header__action--account {
+		display: inline-flex;
+	}
+
+	/* Minimal deliberately keeps the menu button at every width: its whole
+	   premise is that navigation lives in the drawer. */
+	.souq-header--minimal .souq-header__toggle {
+		display: inline-flex;
+		margin-left: 0;
+	}
+}
+
+/* ==========================================================================
+   Search panel
+   ========================================================================== */
+
+.souq-search-panel {
+	position: absolute;
+	inset-inline: 0;
+	top: 100%;
+	z-index: 490;
+	background: var(--souq-color-ground);
+	border-bottom: 1px solid var(--souq-color-hairline);
+	box-shadow: var(--souq-shadow-overlay);
+	padding-block: var(--souq-space-md) var(--souq-space-lg);
+}
+
+.souq-search-panel[hidden] {
+	display: none;
+}
+
+.souq-search-panel__form {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: var(--souq-space-sm);
+	border-bottom: 1px solid var(--souq-color-ink);
+	padding-bottom: var(--souq-space-2xs);
+}
+
+.souq-search-panel__icon {
+	flex-shrink: 0;
+	width: 1.125rem;
+	height: 1.125rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-search-panel__input {
+	flex: 1;
+	min-width: 0;
+	border: none;
+	background: none;
+	font-family: var(--souq-font-display);
+	font-size: clamp(1.25rem, 3vw, 1.75rem);
+	font-weight: 300;
+	color: var(--souq-color-ink);
+}
+
+.souq-search-panel__input::placeholder {
+	color: var(--souq-color-muted);
+}
+
+.souq-search-panel__input:focus {
+	outline: none;
+}
+
+.souq-search-panel__close {
+	flex-shrink: 0;
+	display: inline-flex;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--souq-color-ink);
+}
+
+/* ==========================================================================
+   Mobile drawer
+   ========================================================================== */
+
+.souq-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: 600;
+	display: flex;
+	flex-direction: column;
+	background: var(--souq-color-ground);
+	overflow-y: auto;
+}
+
+.souq-drawer[hidden] {
+	display: none;
+}
+
+.souq-drawer__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: var(--souq-header-height);
+	border-bottom: 1px solid var(--souq-color-hairline);
+}
+
+.souq-drawer__close {
+	display: inline-flex;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--souq-color-ink);
+}
+
+.souq-drawer-nav {
+	list-style: none;
+	margin: 0;
+	padding: var(--souq-space-lg) 0;
+}
+
+.souq-drawer-nav li + li {
+	margin-top: var(--souq-space-sm);
+}
+
+.souq-drawer-nav a {
+	font-family: var(--souq-font-display);
+	font-size: 1.875rem;
+	font-weight: 300;
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+.souq-drawer__foot {
+	margin-top: auto;
+	padding-block: var(--souq-space-lg);
+	border-top: 1px solid var(--souq-color-hairline);
+}
+
+.souq-drawer__account-link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--souq-space-2xs);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: var(--souq-tracking-label);
+	text-decoration: none;
+	color: var(--souq-color-ink);
+}
+
+/* ==========================================================================
+   Footer: light, quiet, on the page ground
+   ========================================================================== */
+
+.souq-footer {
+	/* Was space-2xl (96px) + space-xl (64px) = 160px above the hairline —
+	   read as a large empty band on pages whose last section already ends
+	   with its own bottom padding. Tightened to still read as a clear break
+	   from the page content, not a gap. */
+	margin-top: var(--souq-space-lg);
+	border-top: 1px solid var(--souq-color-hairline);
+	padding-top: var(--souq-space-md);
+}
+
+/* Flex-wrap rather than a grid with a fixed track count: the brand column
+   is optional, and the columns after it are generic widget areas a merchant
+   can populate with any number of Navigation Menu / Paragraph / Custom HTML
+   blocks (see souq_widgets_init()). A fixed grid-template-columns has to
+   guess the count in advance, and guesses wrong the moment a shop adds a
+   third column or leaves one empty — flex-wrap lays out however many are
+   actually there and drops to one per row on narrow screens on its own. */
+.souq-footer__main {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--souq-space-lg) var(--souq-space-xl);
+	padding-bottom: var(--souq-space-xl);
+}
+
+.souq-footer__brand {
+	flex: 1 1 14rem;
+	max-width: 22rem;
+}
+
+.souq-footer__col {
+	flex: 1 1 10rem;
+	min-width: 0;
+}
+
+.souq-footer .souq-wordmark--footer .souq-wordmark__text {
+	font-size: 1.5rem;
+}
+
+.souq-footer__tagline {
+	margin-top: var(--souq-space-2xs);
+	max-width: 30ch;
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer__heading {
+	font-family: var(--souq-font-display);
+	font-size: 1.25rem;
+	font-weight: 300;
+	margin: 0 0 var(--souq-space-sm);
+}
+
+.souq-footer-nav,
+.souq-footer__col ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.souq-footer-nav li,
+.souq-footer__col li {
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-footer-nav a,
+.souq-footer__col a {
+	font-size: 0.8125rem;
+	text-decoration: none;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer-nav a:hover,
+.souq-footer__col a:hover {
+	color: var(--souq-color-ink);
+}
+
+.souq-footer__social {
+	display: flex;
+	gap: var(--souq-space-sm);
+}
+
+.souq-footer__social a {
+	color: var(--souq-color-ink);
+}
+
+/* WordPress's own core Social Icons block, for a footer column — the
+   flexible way to link any platform (not just the three the Customizer's
+   Connect fields cover). Its default styling is filled colour circles per
+   network, which reads loud against the rest of the quiet footer; restyled
+   to match .souq-footer__social above: plain ink-coloured glyphs, no fill. */
+.souq-footer__col .wp-block-social-links {
+	gap: var(--souq-space-sm) !important;
+	margin: 0;
+	padding: 0;
+}
+
+.souq-footer__col .wp-block-social-link {
+	background: none !important;
+	width: 1.75em;
+	height: 1.75em;
+}
+
+.souq-footer__col .wp-block-social-link a {
+	padding: 0;
+}
+
+.souq-footer__col .wp-block-social-link svg {
+	width: 1.125em;
+	height: 1.125em;
+}
+
+.souq-footer__col .wp-block-social-link,
+.souq-footer__col .wp-block-social-link-anchor,
+.souq-footer__col .wp-social-link {
+	color: var(--souq-color-ink) !important;
+	fill: var(--souq-color-ink) !important;
+}
+
+.souq-footer__col .wp-block-social-link:hover .wp-block-social-link-anchor {
+	color: var(--souq-color-muted) !important;
+}
+
+/* A footer column can hold more than one widget stacked (e.g. an
+   introduction paragraph above a menu) — space them apart. */
+.souq-footer-widget {
+	margin-bottom: var(--souq-space-md);
+}
+
+.souq-footer-widget:last-child {
+	margin-bottom: 0;
+}
+
+/* Introduction text, or any other Paragraph/Custom HTML block dropped into a
+   footer column, reads at the same quiet size as the rest of the footer
+   rather than the block editor's default body copy size. */
+.souq-footer__col p {
+	margin: 0 0 var(--souq-space-sm);
+	font-size: 0.8125rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer__col p:last-child {
+	margin-bottom: 0;
+}
+
+/* Navigation Menu blocks — the flexible way to add a second, third, or
+   duplicate menu (Terms, Returns, the primary menu again) to any column,
+   any number of times, styled to match the legacy wp_nav_menu() output
+   above so the two are visually indistinguishable. */
+.souq-footer__col .wp-block-navigation {
+	display: block;
+}
+
+.souq-footer__col .wp-block-navigation__container {
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.souq-footer__col .wp-block-navigation-item {
+	margin-bottom: var(--souq-space-2xs);
+}
+
+.souq-footer__col .wp-block-navigation-item__content {
+	font-size: 0.8125rem;
+	text-decoration: none;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer__col .wp-block-navigation-item__content:hover {
+	color: var(--souq-color-ink);
+}
+
+.souq-footer__social a:hover {
+	opacity: 0.6;
+}
+
+.souq-footer__bottom {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--souq-space-sm);
+	padding-block: var(--souq-space-sm) var(--souq-space-lg);
+	border-top: 1px solid var(--souq-color-hairline);
+}
+
+.souq-footer__copy {
+	margin: 0;
+	font-size: 0.75rem;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer-legal {
+	display: flex;
+	gap: var(--souq-space-md);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.souq-footer-legal a {
+	font-size: 0.75rem;
+	text-decoration: none;
+	color: var(--souq-color-muted);
+}
+
+.souq-footer-legal a:hover {
+	color: var(--souq-color-ink);
+}

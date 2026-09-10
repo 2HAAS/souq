@@ -1,0 +1,177 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": true,
+		"useRootPaddingAwareAlignments": true,
+		"layout": {
+			"contentSize": "44rem",
+			"wideSize": "88rem"
+		},
+		"color": {
+			"custom": false,
+			"customGradient": false,
+			"defaultPalette": false,
+			"defaultGradients": false,
+			"palette": [
+				{
+					"slug": "accent",
+					"name": "Accent",
+					"color": "var(--souq-color-accent)"
+				},
+				{
+					"slug": "accent-soft",
+					"name": "Accent Soft",
+					"color": "var(--souq-color-accent-soft)"
+				},
+				{
+					"slug": "ink",
+					"name": "Ink",
+					"color": "var(--souq-color-ink)"
+				},
+				{
+					"slug": "muted",
+					"name": "Muted",
+					"color": "var(--souq-color-muted)"
+				},
+				{
+					"slug": "ground",
+					"name": "Ground",
+					"color": "var(--souq-color-ground)"
+				},
+				{
+					"slug": "surface",
+					"name": "Surface",
+					"color": "var(--souq-color-surface)"
+				},
+				{
+					"slug": "sand",
+					"name": "Sand",
+					"color": "var(--souq-color-sand)"
+				}
+			]
+		},
+		"typography": {
+			"customFontSize": false,
+			"fluid": true,
+			"fontFamilies": [
+				{
+					"slug": "display",
+					"name": "Display Serif",
+					"fontFamily": "var(--souq-font-display)"
+				},
+				{
+					"slug": "body",
+					"name": "Body Sans",
+					"fontFamily": "var(--souq-font-body)"
+				}
+			],
+			"fontSizes": [
+				{
+					"slug": "label",
+					"name": "Label",
+					"size": "0.6875rem"
+				},
+				{
+					"slug": "small",
+					"name": "Small",
+					"size": "0.8125rem"
+				},
+				{
+					"slug": "body",
+					"name": "Body",
+					"size": "0.9375rem"
+				},
+				{
+					"slug": "prose",
+					"name": "Prose",
+					"size": "1.125rem"
+				},
+				{
+					"slug": "heading",
+					"name": "Heading",
+					"size": "clamp(1.75rem, 3vw, 2.375rem)"
+				},
+				{
+					"slug": "display",
+					"name": "Display",
+					"size": "clamp(2.75rem, 6vw, 4.5rem)"
+				}
+			]
+		},
+		"spacing": {
+			"units": [ "px", "rem", "vh", "vw", "%" ],
+			"spacingSizes": [
+				{ "slug": "20", "name": "XS", "size": "0.75rem" },
+				{ "slug": "30", "name": "S", "size": "1rem" },
+				{ "slug": "40", "name": "M", "size": "1.5rem" },
+				{ "slug": "50", "name": "L", "size": "2.5rem" },
+				{ "slug": "60", "name": "XL", "size": "4rem" },
+				{ "slug": "70", "name": "2XL", "size": "6rem" }
+			]
+		},
+		"border": {
+			"radius": true,
+			"color": true,
+			"style": true,
+			"width": true
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var(--souq-color-ground)",
+			"text": "var(--souq-color-ink)"
+		},
+		"typography": {
+			"fontFamily": "var(--souq-font-body)",
+			"fontSize": "0.9375rem",
+			"lineHeight": "1.6"
+		},
+		"spacing": {
+			"blockGap": "1.5rem"
+		},
+		"elements": {
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--souq-font-display)",
+					"fontWeight": "300",
+					"lineHeight": "1.1"
+				}
+			},
+			"link": {
+				"color": {
+					"text": "inherit"
+				}
+			},
+			"button": {
+				"color": {
+					"background": "var(--souq-color-accent)",
+					"text": "var(--souq-color-ground)"
+				},
+				"border": {
+					"radius": "var(--souq-radius-md)"
+				},
+				"typography": {
+					"fontFamily": "var(--souq-font-body)",
+					"fontSize": "0.6875rem",
+					"textTransform": "uppercase",
+					"letterSpacing": "0.12em"
+				},
+				"spacing": {
+					"padding": {
+						"top": "0.875rem",
+						"bottom": "0.875rem",
+						"left": "1.75rem",
+						"right": "1.75rem"
+					}
+				},
+				":hover": {
+					"color": {
+						"background": "var(--souq-color-accent-deep)",
+						"text": "var(--souq-color-ground)"
+					}
+				}
+			}
+		}
+	}
+}
