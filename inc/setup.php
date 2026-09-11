@@ -102,6 +102,45 @@ function souq_check_woocommerce_dependency() {
 add_action( 'admin_init', 'souq_check_woocommerce_dependency' );
 
 /**
+ * The block-based Checkout hardcodes billing email as required with no
+ * filter to override it, so the Checkout page uses the classic
+ * [woocommerce_checkout] shortcode instead, where this filter applies.
+ *
+ * This store only collects name, one free-text address field, and phone —
+ * company, address line 2, city, state, postcode, country and email are
+ * dropped entirely rather than just made optional. The store's base country
+ * (Bangladesh) is used for every order since there is no country field.
+ */
+function souq_simplify_checkout_fields( $fields ) {
+	foreach ( array( 'billing', 'shipping' ) as $group ) {
+		foreach ( array( 'company', 'address_2', 'city', 'state', 'postcode', 'country', 'last_name' ) as $suffix ) {
+			unset( $fields[ $group ][ "{$group}_{$suffix}" ] );
+		}
+	}
+	unset( $fields['billing']['billing_email'] );
+
+	foreach ( array( 'billing', 'shipping' ) as $group ) {
+		if ( isset( $fields[ $group ][ "{$group}_first_name" ] ) ) {
+			$fields[ $group ][ "{$group}_first_name" ]['label'] = __( 'Name', 'souq' );
+		}
+
+		if ( isset( $fields[ $group ][ "{$group}_address_1" ] ) ) {
+			$fields[ $group ][ "{$group}_address_1" ]['type']  = 'textarea';
+			$fields[ $group ][ "{$group}_address_1" ]['label'] = __( 'Address', 'souq' );
+			$fields[ $group ][ "{$group}_address_1" ]['class'] = array( 'form-row-wide' );
+			unset( $fields[ $group ][ "{$group}_address_1" ]['placeholder'] );
+		}
+	}
+
+	if ( isset( $fields['billing']['billing_phone'] ) ) {
+		$fields['billing']['billing_phone']['required'] = true;
+	}
+
+	return $fields;
+}
+add_filter( 'woocommerce_checkout_fields', 'souq_simplify_checkout_fields' );
+
+/**
  * Newsletter subscribers: private CPT so merchants can view/export signups
  * from the homepage newsletter pattern's REST endpoint (class-souq-block-patterns.php)
  * without standing up a mailing-list service dependency in the foundation pass.
