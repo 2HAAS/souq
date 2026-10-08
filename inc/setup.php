@@ -102,35 +102,51 @@ function souq_check_woocommerce_dependency() {
 add_action( 'admin_init', 'souq_check_woocommerce_dependency' );
 
 /**
- * The block-based Checkout hardcodes billing email as required with no
+ * The block based Checkout hardcodes billing email as required with no
  * filter to override it, so the Checkout page uses the classic
  * [woocommerce_checkout] shortcode instead, where this filter applies.
  *
- * This store only collects name, one free-text address field, and phone —
- * company, address line 2, city, state, postcode, country and email are
- * dropped entirely rather than just made optional. The store's base country
- * (Bangladesh) is used for every order since there is no country field.
+ * This store collects name, one free text address field, district and phone.
+ * Company, address line 2, city, postcode, last name and email are dropped.
+ * Country is a hidden field fixed to Bangladesh so shipping zones can match.
+ * District (state) stays so shipping rates can separate Dhaka from the rest.
  */
 function souq_simplify_checkout_fields( $fields ) {
 	foreach ( array( 'billing', 'shipping' ) as $group ) {
-		foreach ( array( 'company', 'address_2', 'city', 'state', 'postcode', 'country', 'last_name' ) as $suffix ) {
+		foreach ( array( 'company', 'address_2', 'city', 'postcode', 'last_name' ) as $suffix ) {
 			unset( $fields[ $group ][ "{$group}_{$suffix}" ] );
 		}
-	}
-	unset( $fields['billing']['billing_email'] );
 
-	foreach ( array( 'billing', 'shipping' ) as $group ) {
+		if ( isset( $fields[ $group ][ "{$group}_country" ] ) ) {
+			$fields[ $group ][ "{$group}_country" ] = array(
+				'type'     => 'hidden',
+				'default'  => 'BD',
+				'required' => false,
+				'class'    => array( 'hidden' ),
+			);
+		}
+
+		if ( isset( $fields[ $group ][ "{$group}_state" ] ) ) {
+			$fields[ $group ][ "{$group}_state" ]['label']    = __( 'District', 'souq' );
+			$fields[ $group ][ "{$group}_state" ]['required'] = true;
+			$fields[ $group ][ "{$group}_state" ]['class']    = array( 'form-row-wide' );
+		}
+
 		if ( isset( $fields[ $group ][ "{$group}_first_name" ] ) ) {
 			$fields[ $group ][ "{$group}_first_name" ]['label'] = __( 'Name', 'souq' );
+			$fields[ $group ][ "{$group}_first_name" ]['class'] = array( 'form-row-wide' );
 		}
 
 		if ( isset( $fields[ $group ][ "{$group}_address_1" ] ) ) {
-			$fields[ $group ][ "{$group}_address_1" ]['type']  = 'textarea';
-			$fields[ $group ][ "{$group}_address_1" ]['label'] = __( 'Address', 'souq' );
-			$fields[ $group ][ "{$group}_address_1" ]['class'] = array( 'form-row-wide' );
+			$fields[ $group ][ "{$group}_address_1" ]['type']     = 'textarea';
+			$fields[ $group ][ "{$group}_address_1" ]['label']    = __( 'Address', 'souq' );
+			$fields[ $group ][ "{$group}_address_1" ]['class']    = array( 'form-row-wide' );
+			$fields[ $group ][ "{$group}_address_1" ]['required'] = true;
 			unset( $fields[ $group ][ "{$group}_address_1" ]['placeholder'] );
 		}
 	}
+
+	unset( $fields['billing']['billing_email'] );
 
 	if ( isset( $fields['billing']['billing_phone'] ) ) {
 		$fields['billing']['billing_phone']['required'] = true;
@@ -139,6 +155,67 @@ function souq_simplify_checkout_fields( $fields ) {
 	return $fields;
 }
 add_filter( 'woocommerce_checkout_fields', 'souq_simplify_checkout_fields' );
+
+/**
+ * Default the customer country to Bangladesh so the shipping package
+ * always has a destination during cart and checkout calculations.
+ */
+add_filter( 'default_checkout_billing_country', function () {
+	return 'BD';
+} );
+add_filter( 'default_checkout_shipping_country', function () {
+	return 'BD';
+} );
+
+/**
+ * Force Bangladesh on the server side so a tampered request cannot
+ * change the country.
+ */
+function souq_force_country_bd( $data ) {
+	$data['billing_country']  = 'BD';
+	$data['shipping_country'] = 'BD';
+	return $data;
+}
+add_filter( 'woocommerce_checkout_posted_data', 'souq_force_country_bd' );
+
+// /**
+//  * The block-based Checkout hardcodes billing email as required with no
+//  * filter to override it, so the Checkout page uses the classic
+//  * [woocommerce_checkout] shortcode instead, where this filter applies.
+//  *
+//  * This store only collects name, one free-text address field, and phone —
+//  * company, address line 2, city, state, postcode, country and email are
+//  * dropped entirely rather than just made optional. The store's base country
+//  * (Bangladesh) is used for every order since there is no country field.
+//  */
+// function souq_simplify_checkout_fields( $fields ) {
+// 	foreach ( array( 'billing', 'shipping' ) as $group ) {
+// 		foreach ( array( 'company', 'address_2', 'city', 'state', 'postcode', 'country', 'last_name' ) as $suffix ) {
+// 			unset( $fields[ $group ][ "{$group}_{$suffix}" ] );
+// 		}
+// 	}
+// 	unset( $fields['billing']['billing_email'] );
+
+// 	foreach ( array( 'billing', 'shipping' ) as $group ) {
+// 		if ( isset( $fields[ $group ][ "{$group}_first_name" ] ) ) {
+// 			$fields[ $group ][ "{$group}_first_name" ]['label'] = __( 'Name', 'souq' );
+// 		}
+
+// 		if ( isset( $fields[ $group ][ "{$group}_address_1" ] ) ) {
+// 			$fields[ $group ][ "{$group}_address_1" ]['type']  = 'textarea';
+// 			$fields[ $group ][ "{$group}_address_1" ]['label'] = __( 'Address', 'souq' );
+// 			$fields[ $group ][ "{$group}_address_1" ]['class'] = array( 'form-row-wide' );
+// 			unset( $fields[ $group ][ "{$group}_address_1" ]['placeholder'] );
+// 		}
+// 	}
+
+// 	if ( isset( $fields['billing']['billing_phone'] ) ) {
+// 		$fields['billing']['billing_phone']['required'] = true;
+// 	}
+
+// 	return $fields;
+// }
+// add_filter( 'woocommerce_checkout_fields', 'souq_simplify_checkout_fields' );
 
 /**
  * Newsletter subscribers: private CPT so merchants can view/export signups
