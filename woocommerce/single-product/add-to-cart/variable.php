@@ -56,6 +56,32 @@ do_action( 'woocommerce_before_add_to_cart_form' );
 						$available_values[] = $variation['attributes'][ $key ];
 					}
 				}
+
+				// $options arrives in term-name order. Global attributes are
+				// re-read through wc_get_product_terms() so the buttons follow
+				// the order set under Products > Attributes (as WooCommerce's
+				// own dropdown does); custom attributes keep their typed order.
+				$choices = array();
+				if ( $is_taxonomy ) {
+					$terms = wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) );
+					foreach ( $terms as $term ) {
+						if ( in_array( $term->slug, $options, true ) ) {
+							$choices[] = array(
+								'value' => $term->slug,
+								'label' => $term->name,
+								'term'  => $term,
+							);
+						}
+					}
+				} else {
+					foreach ( $options as $option ) {
+						$choices[] = array(
+							'value' => $option,
+							'label' => apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute_name, $product ),
+							'term'  => null,
+						);
+					}
+				}
 				?>
 				<div class="souq-attr souq-variation-row" data-attribute="<?php echo esc_attr( $attribute_id ); ?>">
 
@@ -67,11 +93,11 @@ do_action( 'woocommerce_before_add_to_cart_form' );
 					</div>
 
 					<div class="<?php echo $use_swatches ? 'souq-swatches' : 'souq-sizes'; ?>">
-						<?php foreach ( $options as $option ) : ?>
+						<?php foreach ( $choices as $choice ) : ?>
 							<?php
-							$option_slug  = $is_taxonomy ? sanitize_title( $option ) : $option;
-							$term         = $is_taxonomy ? get_term_by( 'slug', $option_slug, $attribute_name ) : null;
-							$label        = $term ? $term->name : apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute_name, $product );
+							$option_slug  = $choice['value'];
+							$term         = $choice['term'];
+							$label        = $choice['label'];
 							$is_selected  = ( (string) $selected_value === (string) $option_slug );
 							$is_available = empty( $available_variations )
 								|| in_array( $option_slug, $available_values, true )
@@ -100,15 +126,12 @@ do_action( 'woocommerce_before_add_to_cart_form' );
 					<?php
 					echo '<select id="' . esc_attr( $select_id ) . '" class="souq-visually-hidden" name="attribute_' . esc_attr( $attribute_id ) . '" data-attribute_name="attribute_' . esc_attr( $attribute_id ) . '" tabindex="-1" aria-hidden="true">';
 					echo '<option value="">' . esc_html__( 'Choose an option', 'woocommerce' ) . '</option>';
-					foreach ( $options as $option ) {
-						$option_slug = $is_taxonomy ? sanitize_title( $option ) : $option;
-						$term        = $is_taxonomy ? get_term_by( 'slug', $option_slug, $attribute_name ) : null;
-						$label       = $term ? $term->name : apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute_name, $product );
+					foreach ( $choices as $choice ) {
 						printf(
 							'<option value="%1$s" %2$s>%3$s</option>',
-							esc_attr( $option_slug ),
-							selected( $selected_value, $option_slug, false ),
-							esc_html( $label )
+							esc_attr( $choice['value'] ),
+							selected( $selected_value, $choice['value'], false ),
+							esc_html( $choice['label'] )
 						);
 					}
 					echo '</select>';
