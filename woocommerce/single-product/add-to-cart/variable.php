@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product;
 
+$available_variations = is_array( $available_variations ) ? $available_variations : array();
+$attributes           = is_array( $attributes ) ? $attributes : array();
+
 $attribute_keys  = array_keys( $attributes );
 $variations_json = wp_json_encode( $available_variations );
 $variations_attr = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
