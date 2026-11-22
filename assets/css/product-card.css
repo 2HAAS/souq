@@ -196,9 +196,11 @@
 	display: block;
 	width: 0.75rem;
 	height: 0.75rem;
+	padding: 0;
 	border: 1px solid var(--souq-color-hairline);
 	border-radius: 2px;
 	background: var(--souq-swatch-color, var(--souq-color-surface));
+	cursor: pointer;
 }
 
 /* WooCommerce's price markup inside the card */

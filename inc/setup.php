@@ -433,7 +433,7 @@ function souq_get_product_images( $product, $limit = 6 ) {
  * swatch attribute, so the card simply omits the row.
  *
  * @param WC_Product $product Product to inspect.
- * @return array<int, array{name:string, color:string}>
+ * @return array<int, array{name:string, color:string, image_id:int}>
  */
 function souq_get_card_swatches( $product ) {
 	if ( ! class_exists( '\Souq\Attribute_Swatches' ) || ! $product instanceof WC_Product ) {
@@ -451,12 +451,16 @@ function souq_get_card_swatches( $product ) {
 	}
 
 	$swatches = array();
+	$image_map = \Souq\Attribute_Swatches::get_product_map( $product->get_id() );
 	foreach ( $terms as $term ) {
 		$color = \Souq\Attribute_Swatches::get_term_color( $term->term_id );
 		if ( $color ) {
 			$swatches[] = array(
 				'name'  => $term->name,
 				'color' => $color,
+				'image_id' => isset( $image_map[ $taxonomy ][ $term->slug ] )
+					? (int) $image_map[ $taxonomy ][ $term->slug ]
+					: 0,
 			);
 		}
 	}

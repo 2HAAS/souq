@@ -55,6 +55,7 @@ $has_multi = count( $images ) > 1;
 							'alt'        => '',
 							'loading'    => 0 === $index ? 'lazy' : 'lazy',
 							'data-index' => $index,
+							'data-attachment-id' => $image_id,
 						)
 					);
 					?>
@@ -110,11 +111,14 @@ $has_multi = count( $images ) > 1;
 			<?php if ( ! empty( $swatches ) ) : ?>
 				<span class="souq-card__swatches" aria-label="<?php esc_attr_e( 'Available colours', 'souq' ); ?>">
 					<?php foreach ( $swatches as $swatch ) : ?>
-						<span
+						<button
+							type="button"
 							class="souq-card__swatch"
 							style="--souq-swatch-color: <?php echo esc_attr( $swatch['color'] ); ?>"
 							title="<?php echo esc_attr( $swatch['name'] ); ?>"
-						></span>
+							aria-label="<?php echo esc_attr( $swatch['name'] ); ?>"
+							<?php if ( $swatch['image_id'] ) : ?>data-souq-card-image-id="<?php echo absint( $swatch['image_id'] ); ?>"<?php endif; ?>
+						></button>
 					<?php endforeach; ?>
 				</span>
 			<?php endif; ?>

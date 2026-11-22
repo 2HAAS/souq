@@ -131,9 +131,29 @@
 				return;
 			}
 
+			var card = media.closest( '.souq-card' );
+			if ( card ) {
+				card.querySelectorAll( '[data-souq-card-image-id]' ).forEach( function ( swatch ) {
+					var showMappedImage = function () {
+						var imageId = swatch.getAttribute( 'data-souq-card-image-id' );
+						var target = slides.findIndex( function ( slide ) {
+							return slide.getAttribute( 'data-attachment-id' ) === imageId;
+						} );
+						if ( target !== -1 ) {
+							slider.goTo( target, false );
+						}
+					};
+					swatch.addEventListener( 'mouseenter', showMappedImage );
+					swatch.addEventListener( 'focus', showMappedImage );
+					swatch.addEventListener( 'click', function ( event ) {
+						event.preventDefault();
+						showMappedImage();
+					} );
+				} );
+			}
+
 			// Arrow keys work once anything inside the card has focus, so the
 			// slider is reachable without a pointer.
-			var card = media.closest( '.souq-card' );
 			if ( card ) {
 				card.addEventListener( 'keydown', function ( e ) {
 					if ( e.key === 'ArrowRight' ) {
@@ -220,16 +240,51 @@
 		}
 
 		$( form ).on( 'found_variation', function ( event, variation ) {
-			if ( ! variation || ! variation.image_id ) {
+			if ( ! variation ) {
 				return;
 			}
 
-			var target = slides.findIndex( function ( slide ) {
-				return slide.getAttribute( 'data-attachment-id' ) === String( variation.image_id );
-			} );
+			var map = {};
+			try {
+				map = JSON.parse( form.getAttribute( 'data-souq-variation-image-map' ) || '{}' );
+			} catch ( error ) {
+				map = {};
+			}
 
-			if ( target !== -1 && target !== slider.current() ) {
-				slider.goTo( target, false );
+			var mappedTaxonomies = Object.keys( map );
+			if ( mappedTaxonomies.length ) {
+				var handledSwatch = false;
+				mappedTaxonomies.forEach( function ( taxonomy ) {
+					var attributeKey = 'attribute_' + taxonomy;
+					var selectedValue = variation.attributes ? variation.attributes[ attributeKey ] : '';
+					if ( ! selectedValue ) {
+						return;
+					}
+					handledSwatch = true;
+					var imageId = map[ taxonomy ][ selectedValue ];
+					if ( ! imageId ) {
+						return;
+					}
+					var target = slides.findIndex( function ( slide ) {
+						return slide.getAttribute( 'data-attachment-id' ) === String( imageId );
+					} );
+					if ( target !== -1 && target !== slider.current() ) {
+						slider.goTo( target, false );
+					}
+				} );
+				if ( handledSwatch ) {
+					return;
+				}
+			}
+
+			if ( variation.image_id ) {
+				var target = slides.findIndex( function ( slide ) {
+					return slide.getAttribute( 'data-attachment-id' ) === String( variation.image_id );
+				} );
+
+				if ( target !== -1 && target !== slider.current() ) {
+					slider.goTo( target, false );
+				}
 			}
 		} );
 
