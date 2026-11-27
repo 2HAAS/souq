@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SOUQ_VERSION', '0.1.0' );
+define( 'SOUQ_VERSION', '0.2.10' );
 define( 'SOUQ_DIR', get_template_directory() );
 define( 'SOUQ_URI', get_template_directory_uri() );
 

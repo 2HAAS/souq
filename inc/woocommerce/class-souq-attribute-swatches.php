@@ -35,7 +35,7 @@ class Attribute_Swatches {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_color_picker' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'render_product_data_panel' ) );
-		add_action( 'save_post_product', array( $this, 'save_product_map' ), 30, 2 );
+		add_action( 'woocommerce_admin_process_product_object', array( $this, 'save_product_map' ) );
 	}
 
 	public function enqueue_color_picker( $hook ) {
@@ -123,7 +123,10 @@ class Attribute_Swatches {
 			}
 			echo '</div>';
 			echo '<p style="margin:0;"><input type="hidden" name="' . $input_name . '" value="' . ( $image_id ? (int) $image_id : '' ) . '" class="souq-variation-image-id">';
-			echo '<button type="button" class="button souq-choose-variation-image" data-allowed="' . esc_attr( wp_json_encode( $allowed ) ) . '">' . esc_html__( 'Choose image', 'souq' ) . '</button> ';
+			echo '<button type="button" class="button souq-choose-variation-image" data-allowed="' . esc_attr( wp_json_encode( $allowed ) ) . '"' . disabled( empty( $allowed ), true, false ) . '>' . esc_html__( 'Choose image', 'souq' ) . '</button> ';
+			if ( empty( $allowed ) ) {
+				echo '<span class="description">' . esc_html__( 'Add product images first.', 'souq' ) . '</span> ';
+			}
 			echo '<button type="button" class="button souq-clear-variation-image" style="' . ( $image_id ? '' : 'display:none;' ) . '">' . esc_html__( 'Remove', 'souq' ) . '</button></p>';
 			echo '</div>';
 		}
@@ -131,19 +134,19 @@ class Attribute_Swatches {
 		echo '</div></div>';
 	}
 
-	public function save_product_map( $post_id, $post ) {
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+	public function save_product_map( $product = null, $post = null ) {
+		if ( ! $product instanceof \WC_Product ) {
+			$product_id = $post instanceof \WP_Post ? $post->ID : absint( $product );
+			$product    = $product_id ? wc_get_product( $product_id ) : false;
+		}
+		if ( ! $product instanceof \WC_Product || ! $product->is_type( 'variable' ) ) {
 			return;
 		}
-		if ( ! current_user_can( 'edit_product', $post_id ) ) {
+		$post_id = $product->get_id();
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
 		if ( ! isset( $_POST['_souq_variation_image_map_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_souq_variation_image_map_nonce'] ) ), 'souq_save_variation_image_map' ) ) {
-			return;
-		}
-
-		$product = wc_get_product( $post_id );
-		if ( ! $product || ! $product->is_type( 'variable' ) ) {
 			return;
 		}
 
@@ -167,9 +170,9 @@ class Attribute_Swatches {
 		}
 
 		if ( empty( $map ) ) {
-			delete_post_meta( $post_id, self::PRODUCT_MAP_KEY );
+			$product->delete_meta_data( self::PRODUCT_MAP_KEY );
 		} else {
-			update_post_meta( $post_id, self::PRODUCT_MAP_KEY, $map );
+			$product->update_meta_data( self::PRODUCT_MAP_KEY, $map );
 		}
 	}
 

@@ -27,7 +27,6 @@
    be set here rather than on the inner container. Content sits low in the
    frame, leaving the upper two-thirds of the photograph uninterrupted. */
 .souq-hero.wp-block-cover {
-	align-items: flex-end;
 	padding-bottom: clamp(2.5rem, 8vh, 5.5rem);
 }
 

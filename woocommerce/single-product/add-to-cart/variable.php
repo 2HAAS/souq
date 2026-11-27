@@ -21,7 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product;
 
-$available_variations = is_array( $available_variations ) ? $available_variations : array();
+$available_variations = false === $available_variations
+	? false
+	: ( is_array( $available_variations ) ? $available_variations : array() );
 $attributes           = is_array( $attributes ) ? $attributes : array();
 
 $attribute_keys  = array_keys( $attributes );
@@ -58,10 +60,12 @@ do_action( 'woocommerce_before_add_to_cart_form' );
 				// in-stock variation at all. WooCommerce's own JS refines this
 				// per-combination as soon as another attribute is chosen.
 				$available_values = array();
-				foreach ( $available_variations as $variation ) {
-					$key = 'attribute_' . $attribute_id;
-					if ( isset( $variation['attributes'][ $key ] ) ) {
-						$available_values[] = $variation['attributes'][ $key ];
+				if ( is_array( $available_variations ) ) {
+					foreach ( $available_variations as $variation ) {
+						$key = 'attribute_' . $attribute_id;
+						if ( isset( $variation['attributes'][ $key ] ) ) {
+							$available_values[] = $variation['attributes'][ $key ];
+						}
 					}
 				}
 

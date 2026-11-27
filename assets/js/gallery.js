@@ -239,11 +239,7 @@
 			return;
 		}
 
-		$( form ).on( 'found_variation', function ( event, variation ) {
-			if ( ! variation ) {
-				return;
-			}
-
+		function showMappedSwatchImage() {
 			var map = {};
 			try {
 				map = JSON.parse( form.getAttribute( 'data-souq-variation-image-map' ) || '{}' );
@@ -251,30 +247,44 @@
 				map = {};
 			}
 
-			var mappedTaxonomies = Object.keys( map );
-			if ( mappedTaxonomies.length ) {
-				var handledSwatch = false;
-				mappedTaxonomies.forEach( function ( taxonomy ) {
-					var attributeKey = 'attribute_' + taxonomy;
-					var selectedValue = variation.attributes ? variation.attributes[ attributeKey ] : '';
-					if ( ! selectedValue ) {
-						return;
-					}
-					handledSwatch = true;
-					var imageId = map[ taxonomy ][ selectedValue ];
-					if ( ! imageId ) {
-						return;
-					}
-					var target = slides.findIndex( function ( slide ) {
-						return slide.getAttribute( 'data-attachment-id' ) === String( imageId );
-					} );
-					if ( target !== -1 && target !== slider.current() ) {
-						slider.goTo( target, false );
-					}
-				} );
-				if ( handledSwatch ) {
+			var handledSwatch = false;
+			Object.keys( map ).forEach( function ( taxonomy ) {
+				var attributeKey = 'attribute_' + taxonomy;
+				var select = form.querySelector( '[name="' + attributeKey + '"]' );
+				var selectedValue = select ? select.value : '';
+				if ( ! selectedValue ) {
 					return;
 				}
+				handledSwatch = true;
+
+				var taxonomyMap = map[ taxonomy ] || {};
+				var imageId = taxonomyMap[ selectedValue ];
+				if ( ! imageId ) {
+					return;
+				}
+
+				var target = slides.findIndex( function ( slide ) {
+					return slide.getAttribute( 'data-attachment-id' ) === String( imageId );
+				} );
+				if ( target !== -1 && target !== slider.current() ) {
+					slider.goTo( target, false );
+				}
+			} );
+
+			return handledSwatch;
+		}
+
+		// Update as soon as the shopper chooses a mapped swatch, even before
+		// all attributes are selected or WooCommerce resolves an AJAX variation.
+		$( form ).on( 'change.souqVariationImage', '.variations select', showMappedSwatchImage );
+
+		$( form ).on( 'found_variation', function ( event, variation ) {
+			if ( ! variation ) {
+				return;
+			}
+
+			if ( showMappedSwatchImage() ) {
+				return;
 			}
 
 			if ( variation.image_id ) {

@@ -16,18 +16,21 @@ jQuery( function ( $ ) {
 		} catch ( error ) {
 			allowed = [];
 		}
+		if ( ! allowed.length ) {
+			return;
+		}
 
 		var frame = wp.media({
 			title: 'Choose variation image',
 			button: { text: 'Use this image' },
 			multiple: false,
-			library: { type: 'image' },
+			library: { type: 'image', include: allowed },
 		});
 
 		frame.on( 'open', function () {
 			var selection = frame.state().get( 'selection' );
 			var currentId = parseInt( input.val(), 10 );
-			if ( currentId ) {
+			if ( currentId && allowed.indexOf( currentId ) !== -1 ) {
 				selection.add( wp.media.attachment( currentId ) );
 			}
 		});
