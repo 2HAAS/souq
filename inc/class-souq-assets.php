@@ -48,6 +48,21 @@ class Assets {
 		$this->style( 'souq-header-footer', 'header-footer.css', array( 'souq-components' ) );
 		$this->style( 'souq-search', 'search.css', array( 'souq-components' ) );
 
+		$header_config = \souq_header_config();
+		if ( $header_config['marquee'] && ! empty( $header_config['announcements'] ) ) {
+			$announcement_script = SOUQ_DIR . '/assets/js/announcement.js';
+			wp_enqueue_script(
+				'souq-announcement',
+				SOUQ_URI . '/assets/js/announcement.js',
+				array(),
+				file_exists( $announcement_script ) ? (string) filemtime( $announcement_script ) : SOUQ_VERSION,
+				array(
+					'strategy'  => 'defer',
+					'in_footer' => true,
+				)
+			);
+		}
+
 		$is_woo = function_exists( 'is_woocommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() );
 		$is_product = function_exists( 'is_product' ) && is_product();
 

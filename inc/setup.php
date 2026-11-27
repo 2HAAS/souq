@@ -62,8 +62,8 @@ function souq_setup() {
 	// PhotoSwipe to fight our own markup.
 
 	// Block editor. The palette, font families, font sizes and spacing scale
-	// are declared in theme.json so WordPress's own editor and Site Editor
-	// controls are the single source of truth; don't re-declare them here.
+	// are declared in theme.json; Customizer color and font choices are synced
+	// into that configuration so the editor and storefront stay aligned.
 	add_theme_support( 'editor-styles' );
 	add_editor_style( 'assets/css/editor-style.css' );
 
@@ -309,19 +309,42 @@ function souq_default_primary_menu() {
  * One place for the header's presentation decisions so the template, the body
  * classes and the announcement bar cannot disagree with each other.
  *
- * @return array{layout:string, sticky:bool, transparent:bool, announcement:string, announcement_url:string}
+ * @return array{layout:string, sticky:bool, transparent:bool, announcement:string, announcement_url:string, announcements:array, marquee:bool, marquee_speed:int, announcement_font_size:int, show_site_title:bool, brand_order:string}
  */
 function souq_header_config() {
 	$layout = get_theme_mod( 'souq_header_layout', 'centred' );
-	if ( ! array_key_exists( $layout, \Souq\Customizer::HEADER_LAYOUTS ) ) {
+	if ( ! is_string( $layout ) || ! array_key_exists( $layout, \Souq\Customizer::HEADER_LAYOUTS ) ) {
 		$layout = 'centred';
 	}
 
-	$announcement = trim( (string) get_theme_mod( 'souq_header_announcement', '' ) );
+	$announcements = get_theme_mod( 'souq_header_announcements', null );
+	if ( ! is_array( $announcements ) ) {
+		$legacy_text = trim( (string) get_theme_mod( 'souq_header_announcement', '' ) );
+		$announcements = $legacy_text ? array(
+			array(
+				'text' => $legacy_text,
+				'url'  => esc_url_raw( get_theme_mod( 'souq_header_announcement_url', '' ) ),
+			),
+		) : array();
+	}
+	$announcements = \Souq\Customizer::sanitize_announcements( $announcements );
+	$announcements = array_values(
+		array_filter(
+			$announcements,
+			function ( $announcement ) {
+				return '' !== $announcement['text'];
+			}
+		)
+	);
+	$announcement = implode( ' ', wp_list_pluck( $announcements, 'text' ) );
 
 	// The overlay only makes sense over a full-bleed hero, which only the
 	// front page has. Anywhere else it would float over body copy.
 	$transparent = (bool) get_theme_mod( 'souq_header_transparent', true ) && is_front_page();
+	$marquee_speed = get_theme_mod( 'souq_announcement_speed', 40 );
+	$marquee_speed = is_numeric( $marquee_speed ) ? (int) $marquee_speed : 40;
+	$font_size     = get_theme_mod( 'souq_announcement_font_size', 11 );
+	$font_size     = is_numeric( $font_size ) ? (int) $font_size : 11;
 
 	return array(
 		'layout'           => $layout,
@@ -329,6 +352,14 @@ function souq_header_config() {
 		'transparent'      => $transparent,
 		'announcement'     => $announcement,
 		'announcement_url' => (string) get_theme_mod( 'souq_header_announcement_url', '' ),
+		'announcements'    => $announcements,
+		'marquee'           => rest_sanitize_boolean( get_theme_mod( 'souq_announcement_marquee', false ) ),
+		'marquee_speed'     => max( 15, min( 100, $marquee_speed ) ),
+		'announcement_font_size' => max( 9, min( 20, $font_size ) ),
+		'show_site_title'  => rest_sanitize_boolean( get_theme_mod( 'souq_header_show_site_title', false ) ),
+		'brand_order'      => in_array( get_theme_mod( 'souq_header_brand_order', 'logo-title' ), array( 'logo-title', 'title-logo' ), true )
+			? get_theme_mod( 'souq_header_brand_order', 'logo-title' )
+			: 'logo-title',
 	);
 }
 
@@ -469,37 +500,50 @@ function souq_get_card_swatches( $product ) {
 }
 
 /**
- * Renders the brand mark: the uploaded logo when set, otherwise a
- * typographic wordmark built from the site title. Both are links home
- * except on the front page, where a link to the current page is noise.
+ * Renders the uploaded logo, optionally paired with the site title; without
+ * a logo, the site title remains the typographic fallback. The mark links
+ * home except on the front page, where a link to the current page is noise.
  *
  * @param array $args {
- *     @type string $class Extra class on the wrapper.
- *     @type bool   $link  Whether to wrap in a link. Default true.
+ *     @type string $class           Extra class on the wrapper.
+ *     @type bool   $link            Whether to wrap in a link. Default true.
+ *     @type bool   $show_site_title Show the site title alongside a custom logo.
+ *     @type string $brand_order     Logo/title arrangement: logo-title or title-logo.
  * }
  */
 function souq_render_wordmark( $args = array() ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'class' => '',
-			'link'  => true,
+			'class'           => '',
+			'link'            => true,
+			'show_site_title' => false,
+			'brand_order'     => 'logo-title',
 		)
 	);
 
 	$classes = trim( 'souq-wordmark ' . $args['class'] );
+	if ( 'title-logo' === $args['brand_order'] ) {
+		$classes .= ' souq-wordmark--title-logo';
+	}
 
 	if ( has_custom_logo() ) {
 		$logo_id = get_theme_mod( 'custom_logo' );
-		$inner   = wp_get_attachment_image(
+		$logo   = wp_get_attachment_image(
 			$logo_id,
 			'full',
 			false,
 			array(
 				'class' => 'souq-wordmark__image',
-				'alt'   => get_bloginfo( 'name' ),
+				'alt'   => $args['show_site_title'] ? '' : get_bloginfo( 'name' ),
 			)
 		);
+		$title = $args['show_site_title']
+			? '<span class="souq-wordmark__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span>'
+			: '';
+		$inner = 'title-logo' === $args['brand_order'] && $title
+			? $title . $logo
+			: $logo . $title;
 	} else {
 		$inner = '<span class="souq-wordmark__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span>';
 	}

@@ -1,7 +1,6 @@
 <?php
 /**
- * Announcement bar. Renders nothing unless a merchant has written something,
- * so an unconfigured site never shows an empty strip.
+ * Announcement bar. Renders nothing unless a merchant has written something.
  *
  * @package Souq
  */
@@ -10,22 +9,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$config = souq_header_config();
+$config       = souq_header_config();
+$announcements = $config['announcements'];
 
-if ( '' === $config['announcement'] ) {
+if ( empty( $announcements ) ) {
 	return;
 }
-
-$url = $config['announcement_url'];
 ?>
 <div class="souq-announcement">
-	<div class="souq-container">
-		<?php if ( $url ) : ?>
-			<a class="souq-announcement__text" href="<?php echo esc_url( $url ); ?>">
-				<?php echo esc_html( $config['announcement'] ); ?>
-			</a>
-		<?php else : ?>
-			<p class="souq-announcement__text"><?php echo esc_html( $config['announcement'] ); ?></p>
+	<div
+		class="souq-announcement__viewport<?php echo $config['marquee'] ? ' souq-announcement__viewport--marquee' : ''; ?>"
+		<?php if ( $config['marquee'] ) : ?>
+			data-souq-announcement-marquee
+			data-speed="<?php echo esc_attr( $config['marquee_speed'] ); ?>"
 		<?php endif; ?>
+		role="region"
+		aria-label="<?php esc_attr_e( 'Store announcements', 'souq' ); ?>"
+	>
+		<div class="souq-announcement__track">
+			<div class="souq-announcement__sequence">
+				<div class="souq-announcement__group">
+					<?php foreach ( $announcements as $announcement ) : ?>
+						<?php if ( $announcement['url'] ) : ?>
+							<a class="souq-announcement__item" href="<?php echo esc_url( $announcement['url'] ); ?>">
+								<?php echo esc_html( $announcement['text'] ); ?>
+							</a>
+						<?php else : ?>
+							<span class="souq-announcement__item">
+								<?php echo esc_html( $announcement['text'] ); ?>
+							</span>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>

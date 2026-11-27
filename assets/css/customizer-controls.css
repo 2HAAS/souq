@@ -1,0 +1,29 @@
+.souq-announcement-repeater {
+	display: grid;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+}
+
+.souq-announcement-row {
+	display: grid;
+	gap: 0.5rem;
+	padding: 0.75rem;
+	border: 1px solid #dcdcde;
+	background: #fff;
+}
+
+.souq-announcement-field {
+	display: grid;
+	gap: 0.25rem;
+	font-size: 12px;
+}
+
+.souq-announcement-field input {
+	width: 100%;
+}
+
+.souq-announcement-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}

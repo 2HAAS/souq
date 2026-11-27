@@ -65,7 +65,14 @@ $stacked_nav = 'stacked' === $config['layout'];
 		</div>
 
 		<div class="souq-header__zone souq-header__zone--brand">
-			<?php souq_render_wordmark(); ?>
+			<?php
+			souq_render_wordmark(
+				array(
+					'show_site_title' => $config['show_site_title'],
+					'brand_order'     => $config['brand_order'],
+				)
+			);
+			?>
 		</div>
 
 		<div class="souq-header__zone souq-header__zone--actions">

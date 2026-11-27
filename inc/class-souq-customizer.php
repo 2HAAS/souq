@@ -56,6 +56,30 @@ class Customizer {
 			'body'    => '"Work Sans", system-ui, sans-serif',
 			'google'  => array( 'EB Garamond:wght@400;500', 'Work Sans:wght@300;400;500' ),
 		),
+		'modern-serif' => array(
+			'label'   => 'Modern Serif (DM Serif Display + DM Sans)',
+			'display' => '"DM Serif Display", Georgia, serif',
+			'body'    => '"DM Sans", system-ui, sans-serif',
+			'google'  => array( 'DM Serif Display', 'DM Sans:wght@300;400;500' ),
+		),
+		'soft-editorial' => array(
+			'label'   => 'Soft Editorial (Lora + Manrope)',
+			'display' => '"Lora", Georgia, serif',
+			'body'    => '"Manrope", system-ui, sans-serif',
+			'google'  => array( 'Lora:wght@400;500', 'Manrope:wght@300;400;500' ),
+		),
+		'heritage-classic' => array(
+			'label'   => 'Classic (Libre Baskerville + Source Sans 3)',
+			'display' => '"Libre Baskerville", Georgia, serif',
+			'body'    => '"Source Sans 3", system-ui, sans-serif',
+			'google'  => array( 'Libre Baskerville:wght@400;700', 'Source Sans 3:wght@300;400;500' ),
+		),
+		'gallery' => array(
+			'label'   => 'Gallery (Bodoni Moda + Manrope)',
+			'display' => '"Bodoni Moda", Georgia, serif',
+			'body'    => '"Manrope", system-ui, sans-serif',
+			'google'  => array( 'Bodoni Moda:wght@400;500', 'Manrope:wght@300;400;500' ),
+		),
 		'modern'     => array(
 			'label'   => 'Modern (Jost only)',
 			'display' => '"Jost", system-ui, sans-serif',
@@ -112,6 +136,9 @@ class Customizer {
 		add_action( 'customize_register', array( $this, 'register' ) );
 		add_action( 'wp_head', array( $this, 'output_tokens_css' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_fonts' ), 5 );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_controls_assets' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_fonts' ) );
+		add_filter( 'wp_theme_json_data_theme', array( $this, 'filter_editor_theme_json' ) );
 		add_action( 'customize_preview_init', array( $this, 'enqueue_preview_script' ) );
 	}
 
@@ -218,40 +245,152 @@ class Customizer {
 			)
 		);
 
-		$wp_customize->add_setting(
-			'souq_header_announcement',
-			array(
-				'default'           => '',
-				'sanitize_callback' => 'sanitize_text_field',
-				'transport'         => 'refresh',
-			)
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_header_show_site_title',
+			false,
+			array( $this, 'sanitize_boolean' ),
+			__( 'Show site name beside the logo', 'souq' ),
+			'checkbox'
 		);
-		$wp_customize->add_control(
-			'souq_header_announcement',
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_header_brand_order',
+			'logo-title',
+			array( $this, 'sanitize_brand_order' ),
+			__( 'Logo and site name order', 'souq' ),
+			'select',
 			array(
-				'label'       => __( 'Announcement bar', 'souq' ),
-				'description' => __( 'A single line above the header, for delivery or promotion notices. Leave empty to hide it.', 'souq' ),
-				'section'     => 'souq_header',
-				'type'        => 'text',
+				'logo-title' => __( 'Logo, then site name', 'souq' ),
+				'title-logo' => __( 'Site name, then logo', 'souq' ),
 			)
 		);
 
-		$wp_customize->add_setting(
-			'souq_header_announcement_url',
+		$default_ground = self::safe_color( get_theme_mod( 'souq_color_ground', self::COLOR_DEFAULTS['ground'] ), self::COLOR_DEFAULTS['ground'] );
+		$default_ink    = self::safe_color( get_theme_mod( 'souq_color_ink', self::COLOR_DEFAULTS['ink'] ), self::COLOR_DEFAULTS['ink'] );
+		$header_colors  = array(
+			'souq_header_background_color'         => array( __( 'Solid header background', 'souq' ), $default_ground ),
+			'souq_header_text_color'               => array( __( 'Solid header text and icons', 'souq' ), $default_ink ),
+			'souq_header_overlay_background_color' => array( __( 'Overlay header background', 'souq' ), $default_ink ),
+			'souq_header_overlay_text_color'       => array( __( 'Overlay header text and icons', 'souq' ), $default_ground ),
+			'souq_announcement_background_color'   => array( __( 'Announcement background', 'souq' ), $default_ink ),
+			'souq_announcement_text_color'         => array( __( 'Announcement text', 'souq' ), $default_ground ),
+		);
+
+		foreach ( $header_colors as $setting_id => $color ) {
+			$wp_customize->add_setting(
+				$setting_id,
+				array(
+					'default'           => $color[1],
+					'sanitize_callback' => 'sanitize_hex_color',
+					'transport'         => 'refresh',
+				)
+			);
+			$wp_customize->add_control(
+				new \WP_Customize_Color_Control(
+					$wp_customize,
+					$setting_id,
+					array(
+						'label'   => $color[0],
+						'section' => 'souq_header',
+					)
+				)
+			);
+		}
+
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_header_overlay_background_opacity',
+			0,
+			array( $this, 'sanitize_overlay_opacity' ),
+			__( 'Overlay background opacity', 'souq' ),
+			'range',
+			array( 'min' => 0, 'max' => 90, 'step' => 5 )
+		);
+
+		require_once SOUQ_DIR . '/inc/class-souq-announcement-control.php';
+		$legacy_text = trim( (string) get_theme_mod( 'souq_header_announcement', '' ) );
+		$legacy_rows = $legacy_text ? array(
 			array(
-				'default'           => '',
-				'sanitize_callback' => 'esc_url_raw',
+				'text' => $legacy_text,
+				'url'  => esc_url_raw( get_theme_mod( 'souq_header_announcement_url', '' ) ),
+			),
+		) : array();
+
+		$wp_customize->add_setting(
+			'souq_header_announcements',
+			array(
+				'default'           => $legacy_rows,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_announcements' ),
 				'transport'         => 'refresh',
 			)
 		);
 		$wp_customize->add_control(
-			'souq_header_announcement_url',
-			array(
-				'label'   => __( 'Announcement link (optional)', 'souq' ),
-				'section' => 'souq_header',
-				'type'    => 'url',
+			new Announcement_Control(
+				$wp_customize,
+				'souq_header_announcements',
+				array(
+					'label'       => __( 'Announcement messages', 'souq' ),
+					'description' => __( 'Add multiple messages with optional links. Empty messages are ignored on the storefront.', 'souq' ),
+					'section'     => 'souq_header',
+				)
 			)
 		);
+
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_announcement_marquee',
+			false,
+			array( $this, 'sanitize_boolean' ),
+			__( 'Scroll announcements continuously', 'souq' ),
+			'checkbox'
+		);
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_announcement_speed',
+			40,
+			array( $this, 'sanitize_announcement_speed' ),
+			__( 'Marquee speed (pixels per second)', 'souq' ),
+			'range',
+			array( 'min' => 15, 'max' => 100, 'step' => 5 ),
+			function () use ( $wp_customize ) {
+				return (bool) $wp_customize->get_setting( 'souq_announcement_marquee' )->value();
+			}
+		);
+		$this->add_header_setting(
+			$wp_customize,
+			'souq_announcement_font_size',
+			11,
+			array( $this, 'sanitize_announcement_font_size' ),
+			__( 'Announcement font size (pixels)', 'souq' ),
+			'range',
+			array( 'min' => 9, 'max' => 20, 'step' => 1 )
+		);
+	}
+
+	private function add_header_setting( $wp_customize, $setting_id, $default, $sanitize_callback, $label, $type, $choices_or_attrs = array(), $active_callback = null ) {
+		$wp_customize->add_setting(
+			$setting_id,
+			array(
+				'default'           => $default,
+				'sanitize_callback' => $sanitize_callback,
+				'transport'         => 'refresh',
+			)
+		);
+		$control = array(
+			'label'   => $label,
+			'section' => 'souq_header',
+			'type'    => $type,
+		);
+		if ( 'select' === $type ) {
+			$control['choices'] = $choices_or_attrs;
+		} elseif ( 'range' === $type ) {
+			$control['input_attrs'] = $choices_or_attrs;
+		}
+		if ( is_callable( $active_callback ) ) {
+			$control['active_callback'] = $active_callback;
+		}
+		$wp_customize->add_control( $setting_id, $control );
 	}
 
 	private function register_colors( $wp_customize ) {
@@ -665,15 +804,62 @@ class Customizer {
 	   --------------------------------------------------------------------- */
 
 	public function sanitize_pairing( $value ) {
-		return array_key_exists( $value, self::PAIRINGS ) ? $value : 'editorial';
+		return is_string( $value ) && array_key_exists( $value, self::PAIRINGS ) ? $value : 'editorial';
 	}
 
 	public function sanitize_header_layout( $value ) {
-		return array_key_exists( $value, self::HEADER_LAYOUTS ) ? $value : 'centred';
+		return is_string( $value ) && array_key_exists( $value, self::HEADER_LAYOUTS ) ? $value : 'centred';
 	}
 
 	public function sanitize_shape( $value ) {
-		return array_key_exists( $value, self::SHAPES ) ? $value : 'subtle';
+		return is_string( $value ) && array_key_exists( $value, self::SHAPES ) ? $value : 'subtle';
+	}
+
+	public function sanitize_boolean( $value ) {
+		return rest_sanitize_boolean( $value );
+	}
+
+	public function sanitize_brand_order( $value ) {
+		return in_array( $value, array( 'logo-title', 'title-logo' ), true ) ? $value : 'logo-title';
+	}
+
+	public function sanitize_overlay_opacity( $value ) {
+		$value = is_numeric( $value ) ? (int) $value : 0;
+		return max( 0, min( 90, $value ) );
+	}
+
+	public function sanitize_announcement_speed( $value ) {
+		$value = is_numeric( $value ) ? (int) $value : 15;
+		return max( 15, min( 100, $value ) );
+	}
+
+	public function sanitize_announcement_font_size( $value ) {
+		$value = is_numeric( $value ) ? (int) $value : 11;
+		return max( 9, min( 20, $value ) );
+	}
+
+	public static function sanitize_announcements( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$announcements = array();
+		foreach ( array_slice( $value, 0, 10 ) as $announcement ) {
+			if ( ! is_array( $announcement ) ) {
+				continue;
+			}
+			$text = isset( $announcement['text'] ) && is_scalar( $announcement['text'] )
+				? sanitize_text_field( $announcement['text'] )
+				: '';
+			$url  = isset( $announcement['url'] ) && is_string( $announcement['url'] )
+				? esc_url_raw( $announcement['url'] )
+				: '';
+			$announcements[] = array(
+				'text' => $text,
+				'url'  => $url,
+			);
+		}
+		return $announcements;
 	}
 
 	public function sanitize_columns( $value ) {
@@ -695,10 +881,19 @@ class Customizer {
 	 * style.css's full token list.
 	 */
 	public function output_tokens_css() {
-		$accent  = get_theme_mod( 'souq_color_accent', self::COLOR_DEFAULTS['accent'] );
-		$ink     = get_theme_mod( 'souq_color_ink', self::COLOR_DEFAULTS['ink'] );
-		$ground  = get_theme_mod( 'souq_color_ground', self::COLOR_DEFAULTS['ground'] );
-		$surface = get_theme_mod( 'souq_color_surface', self::COLOR_DEFAULTS['surface'] );
+		$accent  = self::safe_color( get_theme_mod( 'souq_color_accent', self::COLOR_DEFAULTS['accent'] ), self::COLOR_DEFAULTS['accent'] );
+		$ink     = self::safe_color( get_theme_mod( 'souq_color_ink', self::COLOR_DEFAULTS['ink'] ), self::COLOR_DEFAULTS['ink'] );
+		$ground  = self::safe_color( get_theme_mod( 'souq_color_ground', self::COLOR_DEFAULTS['ground'] ), self::COLOR_DEFAULTS['ground'] );
+		$surface = self::safe_color( get_theme_mod( 'souq_color_surface', self::COLOR_DEFAULTS['surface'] ), self::COLOR_DEFAULTS['surface'] );
+		$header_background = self::safe_color( get_theme_mod( 'souq_header_background_color', $ground ), $ground );
+		$header_text = self::safe_color( get_theme_mod( 'souq_header_text_color', $ink ), $ink );
+		$overlay_background = self::safe_color( get_theme_mod( 'souq_header_overlay_background_color', $ink ), $ink );
+		$overlay_text = self::safe_color( get_theme_mod( 'souq_header_overlay_text_color', $ground ), $ground );
+		$announcement_background = self::safe_color( get_theme_mod( 'souq_announcement_background_color', $ink ), $ink );
+		$announcement_text = self::safe_color( get_theme_mod( 'souq_announcement_text_color', $ground ), $ground );
+		$overlay_opacity = $this->sanitize_overlay_opacity( get_theme_mod( 'souq_header_overlay_background_opacity', 0 ) ) / 100;
+		$announcement_font_size = $this->sanitize_announcement_font_size( get_theme_mod( 'souq_announcement_font_size', 11 ) );
+		$announcement_speed = $this->sanitize_announcement_speed( get_theme_mod( 'souq_announcement_speed', 40 ) );
 
 		$pairing = self::PAIRINGS[ $this->sanitize_pairing( get_theme_mod( 'souq_font_pairing', 'editorial' ) ) ];
 		$shape   = self::SHAPES[ $this->sanitize_shape( get_theme_mod( 'souq_shape', 'subtle' ) ) ];
@@ -708,7 +903,7 @@ class Customizer {
 		$aspect   = $this->sanitize_aspect( get_theme_mod( 'souq_card_aspect', '4 / 5' ) );
 
 		$css = sprintf(
-			':root{--souq-color-accent:%1$s;--souq-color-accent-deep:%2$s;--souq-color-accent-soft:%3$s;--souq-color-accent-soft-deep:%4$s;--souq-color-ink:%5$s;--souq-color-ground:%6$s;--souq-color-surface:%7$s;--souq-color-muted:%8$s;--souq-color-hairline:%9$s;--souq-font-display:%10$s;--souq-font-body:%11$s;--souq-tracking-label:%12$sem;--souq-radius-sm:%13$s;--souq-radius-md:%14$s;--souq-grid-columns:%15$d;--souq-card-aspect:%16$s;}',
+			':root{--souq-color-accent:%1$s;--souq-color-accent-deep:%2$s;--souq-color-accent-soft:%3$s;--souq-color-accent-soft-deep:%4$s;--souq-color-ink:%5$s;--souq-color-ground:%6$s;--souq-color-surface:%7$s;--souq-color-muted:%8$s;--souq-color-hairline:%9$s;--souq-font-display:%10$s;--souq-font-body:%11$s;--souq-tracking-label:%12$sem;--souq-radius-sm:%13$s;--souq-radius-md:%14$s;--souq-grid-columns:%15$d;--souq-card-aspect:%16$s;--souq-header-background:%17$s;--souq-header-text:%18$s;--souq-header-overlay-background:rgba(%19$d,%20$d,%21$d,%22$s);--souq-header-overlay-text:%23$s;--souq-announcement-background:%24$s;--souq-announcement-text:%25$s;--souq-announcement-font-size:%26$dpx;--souq-announcement-speed:%27$dpx;}',
 			self::css_color( $accent ),
 			self::css_color( self::mix( $accent, $ink, 0.22 ) ),
 			self::css_color( self::mix( $accent, $ground, 0.9 ) ),
@@ -726,7 +921,18 @@ class Customizer {
 			self::css_value( $shape['sm'] ),
 			self::css_value( $shape['md'] ),
 			(int) $columns,
-			self::css_value( $aspect )
+			self::css_value( $aspect ),
+			self::css_color( $header_background ),
+			self::css_color( $header_text ),
+			self::to_rgb( $overlay_background )[0],
+			self::to_rgb( $overlay_background )[1],
+			self::to_rgb( $overlay_background )[2],
+			self::css_value( number_format( $overlay_opacity, 2, '.', '' ) ),
+			self::css_color( $overlay_text ),
+			self::css_color( $announcement_background ),
+			self::css_color( $announcement_text ),
+			(int) $announcement_font_size,
+			(int) $announcement_speed
 		);
 
 		printf( '<style id="souq-tokens">%s</style>', $css ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -752,6 +958,11 @@ class Customizer {
 	private static function css_color( $value ) {
 		$hex = sanitize_hex_color( (string) $value );
 		return $hex ? $hex : 'inherit';
+	}
+
+	private static function safe_color( $value, $fallback ) {
+		$hex = is_string( $value ) ? sanitize_hex_color( $value ) : false;
+		return $hex ? $hex : $fallback;
 	}
 
 	/**
@@ -790,18 +1001,143 @@ class Customizer {
 		return array_map( 'hexdec', str_split( $hex, 2 ) );
 	}
 
-	public function enqueue_fonts() {
-		$pairing  = self::PAIRINGS[ $this->sanitize_pairing( get_theme_mod( 'souq_font_pairing', 'editorial' ) ) ];
-		$families = $pairing['google'];
-
-		if ( empty( $families ) ) {
-			return;
+	public function filter_editor_theme_json( $theme_json ) {
+		if ( ! is_object( $theme_json ) || ! method_exists( $theme_json, 'update_with' ) ) {
+			return $theme_json;
 		}
 
-		$src = 'https://fonts.googleapis.com/css2?family=' .
-			implode( '&family=', array_map( 'rawurlencode', $families ) ) .
-			'&display=swap';
+		$accent  = self::safe_color( get_theme_mod( 'souq_color_accent', self::COLOR_DEFAULTS['accent'] ), self::COLOR_DEFAULTS['accent'] );
+		$ink     = self::safe_color( get_theme_mod( 'souq_color_ink', self::COLOR_DEFAULTS['ink'] ), self::COLOR_DEFAULTS['ink'] );
+		$ground  = self::safe_color( get_theme_mod( 'souq_color_ground', self::COLOR_DEFAULTS['ground'] ), self::COLOR_DEFAULTS['ground'] );
+		$surface = self::safe_color( get_theme_mod( 'souq_color_surface', self::COLOR_DEFAULTS['surface'] ), self::COLOR_DEFAULTS['surface'] );
+		$pairing = self::PAIRINGS[ $this->sanitize_pairing( get_theme_mod( 'souq_font_pairing', 'editorial' ) ) ];
+		$palette = array(
+			array( 'slug' => 'accent', 'name' => __( 'Accent', 'souq' ), 'color' => $accent ),
+			array( 'slug' => 'accent-soft', 'name' => __( 'Accent Soft', 'souq' ), 'color' => self::mix( $accent, $ground, 0.9 ) ),
+			array( 'slug' => 'ink', 'name' => __( 'Ink', 'souq' ), 'color' => $ink ),
+			array( 'slug' => 'muted', 'name' => __( 'Muted', 'souq' ), 'color' => self::mix( $ink, $ground, 0.34 ) ),
+			array( 'slug' => 'ground', 'name' => __( 'Ground', 'souq' ), 'color' => $ground ),
+			array( 'slug' => 'surface', 'name' => __( 'Surface', 'souq' ), 'color' => $surface ),
+			array( 'slug' => 'sand', 'name' => __( 'Sand', 'souq' ), 'color' => '#f0dcc0' ),
+		);
 
+		$theme_json->update_with(
+			array(
+				'version'  => 3,
+				'settings' => array(
+					'color'      => array(
+						'custom'  => true,
+						'palette' => $palette,
+					),
+					'typography' => array(
+						'customFontSize' => true,
+						'fontFamilies'   => array(
+							array( 'slug' => 'display', 'name' => __( 'Display Serif', 'souq' ), 'fontFamily' => $pairing['display'] ),
+							array( 'slug' => 'body', 'name' => __( 'Body Sans', 'souq' ), 'fontFamily' => $pairing['body'] ),
+						),
+					),
+				),
+				'styles'   => array(
+					'color'      => array(
+						'background' => $ground,
+						'text'       => $ink,
+					),
+					'typography' => array(
+						'fontFamily' => $pairing['body'],
+					),
+					'elements'   => array(
+						'heading' => array(
+							'typography' => array( 'fontFamily' => $pairing['display'] ),
+						),
+						'button'  => array(
+							'color' => array(
+								'background' => $accent,
+								'text'       => $ground,
+							),
+						),
+					),
+				),
+			),
+			'theme'
+		);
+
+		return $theme_json;
+	}
+
+	public function enqueue_controls_assets() {
+		wp_enqueue_style(
+			'souq-customizer-controls',
+			SOUQ_URI . '/assets/css/customizer-controls.css',
+			array(),
+			SOUQ_VERSION
+		);
+		wp_enqueue_script(
+			'souq-customizer-controls',
+			SOUQ_URI . '/assets/js/customizer-controls.js',
+			array( 'customize-controls' ),
+			SOUQ_VERSION,
+			true
+		);
+		wp_localize_script(
+			'souq-customizer-controls',
+			'souqAnnouncementControlStrings',
+			array(
+				'message'       => __( 'Message', 'souq' ),
+				'link'          => __( 'Link (optional)', 'souq' ),
+				'move_up'       => __( 'Move up', 'souq' ),
+				'move_down'     => __( 'Move down', 'souq' ),
+				'remove'        => __( 'Remove', 'souq' ),
+				'limit_reached' => __( 'You can add up to 10 announcements.', 'souq' ),
+			)
+		);
+	}
+
+	public function enqueue_editor_fonts() {
+		$pairing = self::PAIRINGS[ $this->sanitize_pairing( get_theme_mod( 'souq_font_pairing', 'editorial' ) ) ];
+		$src     = self::google_fonts_url( $pairing );
+		if ( $src ) {
+			wp_enqueue_style( 'souq-editor-google-fonts', $src, array(), null );
+		}
+
+		$accent  = self::safe_color( get_theme_mod( 'souq_color_accent', self::COLOR_DEFAULTS['accent'] ), self::COLOR_DEFAULTS['accent'] );
+		$ink     = self::safe_color( get_theme_mod( 'souq_color_ink', self::COLOR_DEFAULTS['ink'] ), self::COLOR_DEFAULTS['ink'] );
+		$ground  = self::safe_color( get_theme_mod( 'souq_color_ground', self::COLOR_DEFAULTS['ground'] ), self::COLOR_DEFAULTS['ground'] );
+		$surface = self::safe_color( get_theme_mod( 'souq_color_surface', self::COLOR_DEFAULTS['surface'] ), self::COLOR_DEFAULTS['surface'] );
+		$css     = sprintf(
+			':root{--souq-color-accent:%1$s;--souq-color-accent-deep:%2$s;--souq-color-accent-soft:%3$s;--souq-color-accent-soft-deep:%4$s;--souq-color-ink:%5$s;--souq-color-ground:%6$s;--souq-color-surface:%7$s;--souq-color-muted:%8$s;--souq-color-hairline:%9$s;--souq-font-display:%10$s;--souq-font-body:%11$s;}',
+			self::css_color( $accent ),
+			self::css_color( self::mix( $accent, $ink, 0.22 ) ),
+			self::css_color( self::mix( $accent, $ground, 0.9 ) ),
+			self::css_color( self::mix( $accent, $ground, 0.78 ) ),
+			self::css_color( $ink ),
+			self::css_color( $ground ),
+			self::css_color( $surface ),
+			self::css_color( self::mix( $ink, $ground, 0.34 ) ),
+			self::css_color( self::mix( $ink, $ground, 0.84 ) ),
+			self::css_value( $pairing['display'] ),
+			self::css_value( $pairing['body'] )
+		);
+		wp_register_style( 'souq-editor-theme-tokens', false, array(), SOUQ_VERSION );
+		wp_enqueue_style( 'souq-editor-theme-tokens' );
+		wp_add_inline_style( 'souq-editor-theme-tokens', $css );
+	}
+
+	private static function google_fonts_url( $pairing ) {
+		if ( empty( $pairing['google'] ) ) {
+			return '';
+		}
+
+		return 'https://fonts.googleapis.com/css2?family=' .
+			implode( '&family=', array_map( 'rawurlencode', $pairing['google'] ) ) .
+			'&display=swap';
+	}
+
+	public function enqueue_fonts() {
+		$pairing  = self::PAIRINGS[ $this->sanitize_pairing( get_theme_mod( 'souq_font_pairing', 'editorial' ) ) ];
+		$src      = self::google_fonts_url( $pairing );
+		if ( ! $src ) {
+			return;
+		}
 		wp_enqueue_style( 'souq-google-fonts', $src, array(), null );
 	}
 

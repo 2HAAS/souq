@@ -1,7 +1,11 @@
+@import url('../../style.css');
+@import url('components.css');
+@import url('homepage.css');
+
 /* Block editor preview.
    Mirrors the v0.2 tokens so patterns look true-to-frontend while editing.
-   These literals are a fallback for the editor iframe only; the front end
-   gets the live values from Customizer::output_tokens_css(). */
+   These literals are an iframe fallback; editor assets add the current
+   Customizer colors and fonts where the editor loads them. */
 
 :root {
 	--souq-color-accent: #8b4a38;

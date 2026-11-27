@@ -9,7 +9,7 @@
 			"wideSize": "88rem"
 		},
 		"color": {
-			"custom": false,
+			"custom": true,
 			"customGradient": false,
 			"defaultPalette": false,
 			"defaultGradients": false,
@@ -52,7 +52,7 @@
 			]
 		},
 		"typography": {
-			"customFontSize": false,
+			"customFontSize": true,
 			"fluid": true,
 			"fontFamilies": [
 				{

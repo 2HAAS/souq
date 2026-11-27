@@ -3,25 +3,100 @@
    ========================================================================== */
 
 .souq-announcement {
-	background: var(--souq-color-ink);
-	color: var(--souq-color-ground);
+	background: var(--souq-announcement-background);
+	color: var(--souq-announcement-text);
 	text-align: center;
 }
 
-.souq-announcement__text {
-	display: block;
-	margin: 0;
-	padding-block: 0.5rem;
-	font-size: 0.6875rem;
+.souq-announcement__viewport {
+	overflow: hidden;
+	width: 100%;
+}
+
+.souq-announcement__track,
+.souq-announcement__sequence,
+.souq-announcement__group {
+	display: flex;
+	align-items: center;
+}
+
+.souq-announcement__track {
+	width: 100%;
+}
+
+.souq-announcement__sequence {
+	flex: 0 0 auto;
+	justify-content: center;
+	width: 100%;
+}
+
+.souq-announcement__group {
+	flex: 0 0 auto;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--souq-space-lg);
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0.5rem var(--souq-space-md);
+}
+
+.souq-announcement__item {
+	display: inline-block;
+	font-size: var(--souq-announcement-font-size);
 	text-transform: uppercase;
 	letter-spacing: var(--souq-tracking-label);
 	color: inherit;
 	text-decoration: none;
+	white-space: normal;
 }
 
-a.souq-announcement__text:hover {
+a.souq-announcement__item:hover {
 	text-decoration: underline;
 	text-underline-offset: 0.2em;
+}
+
+.souq-announcement__viewport--marquee {
+	text-align: left;
+}
+
+.souq-announcement__viewport--marquee .souq-announcement__track {
+	width: max-content;
+}
+
+.souq-announcement__viewport--marquee .souq-announcement__sequence {
+	width: auto;
+	justify-content: flex-start;
+}
+
+.souq-announcement__viewport--marquee .souq-announcement__group {
+	flex-wrap: nowrap;
+	width: max-content;
+}
+
+.souq-announcement__viewport--marquee .souq-announcement__item {
+	white-space: nowrap;
+}
+
+.souq-announcement__viewport--marquee .souq-announcement__track.is-animated {
+	animation: souq-announcement-scroll var(--souq-announcement-duration) linear infinite;
+}
+
+.souq-announcement__viewport--marquee:hover .souq-announcement__track,
+.souq-announcement__viewport--marquee:focus-within .souq-announcement__track {
+	animation-play-state: paused;
+}
+
+@keyframes souq-announcement-scroll {
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.souq-announcement__viewport--marquee .souq-announcement__track {
+		animation: none !important;
+		transform: none !important;
+	}
 }
 
 /* ==========================================================================
@@ -32,7 +107,8 @@ a.souq-announcement__text:hover {
 .souq-header {
 	position: relative;
 	z-index: 500;
-	background: var(--souq-color-ground);
+	background: var(--souq-header-background);
+	color: var(--souq-header-text);
 	border-bottom: 1px solid transparent;
 	transition:
 		border-color var(--souq-duration-base) var(--souq-ease),
@@ -148,8 +224,8 @@ a.souq-announcement__text:hover {
 /* --- Transparent overlay on the homepage hero --- */
 
 .souq-header--transparent {
-	background: transparent;
-	color: var(--souq-color-ground);
+	background: var(--souq-header-overlay-background);
+	color: var(--souq-header-overlay-text);
 }
 
 .souq-header--transparent .souq-wordmark,
@@ -162,8 +238,8 @@ a.souq-announcement__text:hover {
 /* Once the page scrolls the header must become readable against content
    again, so it reverts to the solid ground colour. */
 .souq-header--transparent.is-stuck {
-	background: var(--souq-color-ground);
-	color: var(--souq-color-ink);
+	background: var(--souq-header-background);
+	color: var(--souq-header-text);
 }
 
 /* Wordmark */
@@ -171,8 +247,9 @@ a.souq-announcement__text:hover {
 .souq-wordmark {
 	display: inline-flex;
 	align-items: center;
+	gap: var(--souq-space-xs);
 	text-decoration: none;
-	color: var(--souq-color-ink);
+	color: inherit;
 }
 
 .souq-wordmark__text {
@@ -182,6 +259,11 @@ a.souq-announcement__text:hover {
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
 	white-space: nowrap;
+	color: inherit;
+}
+
+.souq-wordmark--title-logo .souq-wordmark__text {
+	order: -1;
 }
 
 .souq-wordmark__image {
@@ -201,7 +283,7 @@ a.souq-announcement__text:hover {
 	background: none;
 	border: none;
 	cursor: pointer;
-	color: var(--souq-color-ink);
+	color: inherit;
 }
 
 .souq-header__nav {
@@ -225,7 +307,7 @@ a.souq-announcement__text:hover {
 	text-transform: uppercase;
 	letter-spacing: var(--souq-tracking-label);
 	text-decoration: none;
-	color: var(--souq-color-ink);
+	color: inherit;
 	white-space: nowrap;
 }
 
@@ -259,7 +341,7 @@ a.souq-announcement__text:hover {
 	background: none;
 	border: none;
 	cursor: pointer;
-	color: var(--souq-color-ink);
+	color: inherit;
 	text-decoration: none;
 	transition: opacity var(--souq-duration-fast) var(--souq-ease);
 }
